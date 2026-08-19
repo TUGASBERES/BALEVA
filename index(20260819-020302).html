@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BALEVA — Stay • Explore • Experience Lombok</title>
+<meta name="description" content="BALEVA — katalog penginapan, properti sewa dan pengalaman di Lombok.">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--teal:#006a78;--teal2:#008da1;--navy:#064f78;--gold:#f6a800;--bg:#f7f9f9;--ink:#17363c;--muted:#6b8084;--line:#dde7e8;--white:#fff;--shadow:0 12px 35px rgba(0,86,100,.12)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+.container{width:min(1200px,calc(100% - 30px));margin:auto}
+.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.nav{height:78px;display:flex;align-items:center;gap:18px}.logo{width:92px;height:62px;object-fit:contain}.brand{font-weight:900;color:var(--teal);letter-spacing:.04em}.links{margin-left:auto;display:flex;gap:20px;font-size:14px}.actions{display:flex;gap:8px}.btn{border:0;border-radius:12px;padding:10px 14px;font-weight:800}.primary{background:var(--teal);color:#fff}.outline{background:#fff;border:1px solid var(--line)}.gold{background:var(--gold);color:#513900}
+.hero{padding:52px 0 30px;background:linear-gradient(135deg,#edfafa,#fff7e5)}.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:center}.hero h1{font-size:clamp(36px,5vw,64px);line-height:1.02;margin:8px 0 14px;color:#07515e}.hero p{font-size:18px;color:var(--muted);max-width:760px}.hero-logo{width:100%;max-height:300px;object-fit:contain;filter:drop-shadow(0 12px 25px rgba(0,80,95,.16))}.demo{display:inline-block;padding:5px 9px;border-radius:999px;background:#fff2c4;color:#705400;border:1px solid #ead27a;font-size:11px;font-weight:900}
+.search{display:flex;gap:8px;background:#fff;border:1px solid var(--line);padding:8px;border-radius:16px;box-shadow:var(--shadow);max-width:780px}.search input{flex:1;border:0;outline:0;padding:10px;min-width:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:13px}.chip.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.toolbar{position:sticky;top:78px;z-index:40;background:rgba(247,249,249,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}.toolbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:11px 0}.toolbar select{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff}.count{margin-left:auto;color:var(--muted);font-size:14px}
+.section{padding:40px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:18px}h2{margin:0;font-size:28px;color:#123f46}.sub{color:var(--muted);margin:5px 0 0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 5px 18px rgba(0,60,70,.06)}.media{height:176px;position:relative;overflow:hidden;background:linear-gradient(135deg,#81d3df,#ffca55)}.media:before{content:"";position:absolute;inset:18% 8% -4%;background:linear-gradient(135deg,#087a88,#0a4d71);clip-path:polygon(0 100%,30% 34%,50% 57%,68% 14%,100% 100%)}.media:after{content:"";position:absolute;left:-10%;bottom:-28px;width:120%;height:58px;border-radius:50%;background:#fff}.badge{position:absolute;left:10px;top:10px;z-index:2;background:#fff;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}.fav{position:absolute;right:10px;top:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#fff;font-size:18px}.body{padding:14px;display:flex;flex-direction:column;flex:1}.body h3{font-size:17px;margin:0 0 5px}.meta{font-size:12px;color:var(--muted)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.tag{font-size:11px;border-radius:999px;padding:5px 7px;background:#e8f7f7;color:#075f69}.near{font-size:12px;color:var(--muted);margin-top:auto}.card-actions{display:flex;gap:8px;margin-top:12px}.card-actions .btn{flex:1;padding:9px 8px;font-size:12px}
+.mapbox{display:none;margin-top:18px;border-radius:17px;overflow:hidden;border:1px solid var(--line);background:#fff}.mapbox.show{display:block}#map{height:500px}
+.regions{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.region{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.region strong{display:block;font-size:18px;color:var(--teal);margin-bottom:5px}
+.experience{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.exp{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}.exp b{display:block;margin-top:5px}.icon{font-size:28px}
+.footer{margin-top:30px;background:#073d49;color:#daf2f3;padding:34px 0}.footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:24px}
+.modal-bg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,25,30,.56);z-index:100}.modal-bg.show{display:flex}.modal{width:min(780px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.25)}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line)}.modal-body{padding:20px}.close{width:36px;height:36px;border:0;border-radius:50%;background:#eef3f3}.form{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}.full{grid-column:1/-1}.checks{display:flex;gap:7px;flex-wrap:wrap}.checks label{border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px}.summary{margin:15px 0;background:#eff7f7;border-radius:12px;padding:13px;white-space:pre-line;font-size:13px}.agents{display:grid;grid-template-columns:1fr 1fr;gap:12px}.agent{border:1px solid var(--line);border-radius:14px;padding:14px}.agent strong{display:block;margin-bottom:3px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}.experience{grid-template-columns:repeat(3,1fr)}.regions{grid-template-columns:repeat(3,1fr)}.links{display:none}}
+@media(max-width:760px){.container{width:min(100% - 22px,1200px)}.nav{height:70px}.logo{width:72px;height:52px}.brand{display:none}.toolbar{top:70px}.hero-grid{grid-template-columns:1fr}.hero-logo{display:none}.grid{grid-template-columns:repeat(2,1fr)}.count{width:100%;margin-left:0}.regions{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.full{grid-column:auto}.agents{grid-template-columns:1fr}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.experience{grid-template-columns:1fr 1fr}.search{flex-direction:column}.footer-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <img class="logo" src="baleva-logo.png" alt="Logo BALEVA">
+    <div class="brand">BALEVA</div>
+    <nav class="links">
+      <a href="#property">Penginapan</a><a href="#wilayah">Wilayah</a><a href="#experience">Experience</a><a href="#mapSection">Peta Lombok</a>
+    </nav>
+    <div class="actions"><button class="btn outline" id="mapTop">🗺 Peta</button><button class="btn primary" id="generalReq">Cek Ketersediaan</button></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="demo">GITHUB-READY • PROPERTY-FIRST</span>
+      <h1>Stay • Explore • Experience Lombok.</h1>
+      <p>Temukan villa, homestay, hotel, pondok, cottage, guest house dan properti sewa di seluruh Lombok—lengkap dengan pengalaman lokal dan bantuan booking melalui WhatsApp.</p>
+      <div class="search">
+        <input id="q" placeholder="Cari villa, homestay, Sembalun, Kuta, Senggigi...">
+        <button class="btn primary" id="searchBtn">Cari Property</button>
+      </div>
+      <div class="chips" id="regionChips">
+        <button class="chip active" data-region="all">Semua Lombok</button>
+        <button class="chip" data-region="Lombok Barat">Lombok Barat</button>
+        <button class="chip" data-region="Lombok Tengah">Lombok Tengah</button>
+        <button class="chip" data-region="Lombok Timur">Lombok Timur</button>
+        <button class="chip" data-region="Lombok Utara">Lombok Utara</button>
+        <button class="chip" data-region="Kota Mataram">Kota Mataram</button>
+      </div>
+    </div>
+    <img class="hero-logo" src="baleva-logo.png" alt="Logo BALEVA">
+  </div>
+</section>
+
+<div class="toolbar" id="property">
+  <div class="container toolbar-row">
+    <select id="type"><option value="all">Semua Jenis</option><option>Villa</option><option>Homestay</option><option>Hotel</option><option>Pondok</option><option>Guest House</option><option>Cottage</option><option>Lodge</option><option>Property Rental</option><option>Farm Stay</option><option>Bungalow</option></select>
+    <select id="experienceFilter"><option value="all">Semua Experience</option><option>Slow Living</option><option>Agrowisata</option><option>Cooking Class</option><option>Trekking</option><option>Family Stay</option><option>Honeymoon</option><option>Island Trip</option></select>
+    <button class="btn outline" id="toggleMap">🗺 Lihat Peta</button>
+    <span class="count" id="count"></span>
+  </div>
+</div>
+
+<main>
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div><h2>Property pilihan di Lombok</h2><p class="sub">Listing menjadi fokus utama. Peta tersedia saat pengguna membutuhkannya.</p></div></div>
+    <div class="grid" id="grid"></div>
+    <div class="mapbox" id="mapSection"><div id="map"></div></div>
+  </div>
+</section>
+
+<section class="section" id="wilayah" style="background:#edf5f5">
+<div class="container">
+  <div class="section-head"><div><h2>Jelajahi berdasarkan wilayah</h2><p class="sub">Lima kawasan utama BALEVA di Pulau Lombok.</p></div></div>
+  <div class="regions">
+    <div class="region"><strong>Lombok Tengah</strong><span>Kuta • Pujut • Praya • Selong Belanak</span></div>
+    <div class="region"><strong>Lombok Barat</strong><span>Senggigi • Sekotong • Gerung • Lembar</span></div>
+    <div class="region"><strong>Lombok Timur</strong><span>Sembalun • Tetebatu • Jerowaru • Sambelia</span></div>
+    <div class="region"><strong>Lombok Utara</strong><span>Senaru • Bayan • Tanjung • Pemenang</span></div>
+    <div class="region"><strong>Kota Mataram</strong><span>Mataram • Ampenan • Cakranegara • Sekarbela</span></div>
+  </div>
+</div></section>
+
+<section class="section" id="experience">
+<div class="container">
+  <div class="section-head"><div><h2>How do you want to experience Lombok?</h2><p class="sub">Pengalaman lokal melengkapi pilihan properti.</p></div></div>
+  <div class="experience">
+    <div class="exp"><div class="icon">🌿</div><b>Slow Living</b></div>
+    <div class="exp"><div class="icon">🌾</div><b>Agrowisata</b></div>
+    <div class="exp"><div class="icon">🍳</div><b>Cooking Class</b></div>
+    <div class="exp"><div class="icon">🥾</div><b>Trekking</b></div>
+    <div class="exp"><div class="icon">🤿</div><b>Island & Sea</b></div>
+    <div class="exp"><div class="icon">❤️</div><b>Honeymoon</b></div>
+  </div>
+</div></section>
+</main>
+
+<footer class="footer"><div class="container footer-grid">
+<div><img class="logo" src="baleva-logo.png" alt="BALEVA"><p><strong>BALEVA</strong><br>Stay • Explore • Experience Lombok</p></div>
+<div><strong>Wilayah</strong><p>Lombok Barat<br>Lombok Tengah<br>Lombok Timur<br>Lombok Utara<br>Kota Mataram</p></div>
+<div>
+  <strong>Booking Assistance</strong>
+  <p>
+    AL: 087781998529<br>
+    Hendra: 087740137252<br><br>
+    <a href="mailto:adminbaleva@gmail.com">adminbaleva@gmail.com</a><br>
+    <small><a href="login.html" style="opacity:.72;text-decoration:underline;text-underline-offset:3px;">Admin</a></small>
+  </p>
+  <small>Ketersediaan dikonfirmasi melalui WhatsApp.</small>
+</div>
+</div></footer>
+
+
+<div class="modal-bg" id="detailModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <strong id="detailName">Detail Property</strong>
+        <div class="meta" id="detailMeta"></div>
+      </div>
+      <button class="close" id="detailClose">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="media" style="height:260px;border-radius:14px;margin-bottom:18px;"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+        <div style="border:1px solid var(--line);border-radius:12px;padding:13px;">
+          <div class="meta">Jenis Property</div>
+          <strong id="detailType">-</strong>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:12px;padding:13px;">
+          <div class="meta">Wilayah</div>
+          <strong id="detailRegion">-</strong>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <strong>Tentang Property</strong>
+        <p id="detailDescription" style="margin:8px 0 0;color:var(--muted);line-height:1.6;"></p>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <strong>Experience</strong>
+        <div class="tags" id="detailExperiences"></div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <strong>Akses / Lokasi Terdekat</strong>
+        <p id="detailNear" style="margin:8px 0 0;color:var(--muted);"></p>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <strong>Koordinat Lokasi</strong>
+        <p id="detailCoords" style="margin:8px 0 0;color:var(--muted);"></p>
+      </div>
+
+      <div style="display:flex;gap:9px;flex-wrap:wrap;">
+        <button class="btn outline" id="detailMapBtn">🗺 Lihat di Peta</button>
+        <button class="btn primary" id="detailAvailabilityBtn">Cek Ketersediaan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal">
+<div class="modal">
+  <div class="modal-head"><div><strong>Cek Ketersediaan</strong><div class="meta" id="modalName"></div></div><button class="close" id="close">✕</button></div>
+  <div class="modal-body">
+    <div class="form">
+      <div class="field"><label>Check-in</label><input type="date" id="checkin"></div>
+      <div class="field"><label>Check-out</label><input type="date" id="checkout"></div>
+      <div class="field"><label>Dewasa</label><input type="number" id="adults" value="2" min="1"></div>
+      <div class="field"><label>Anak</label><input type="number" id="children" value="0" min="0"></div>
+      <div class="field"><label>Jumlah Kamar</label><input type="number" id="rooms" value="1" min="1"></div>
+      <div class="field"><label>Konsep Menginap</label><select id="concept"><option>Regular Stay</option><option>Slow Living</option><option>Agrowisata</option><option>Family Stay</option><option>Honeymoon</option><option>Workation</option><option>Adventure Stay</option></select></div>
+      <div class="field full"><label>Kebutuhan Tambahan</label>
+        <div class="checks" id="extras">
+          <label><input type="checkbox" value="Trip Lombok"> Trip Lombok</label>
+          <label><input type="checkbox" value="Cooking Class"> Cooking Class</label>
+          <label><input type="checkbox" value="Airport Transfer"> Airport Transfer</label>
+          <label><input type="checkbox" value="Sewa Mobil"> Sewa Mobil</label>
+          <label><input type="checkbox" value="Sewa Motor"> Sewa Motor</label>
+          <label><input type="checkbox" value="Local Guide"> Local Guide</label>
+          <label><input type="checkbox" value="Trekking"> Trekking</label>
+          <label><input type="checkbox" value="Snorkeling"> Snorkeling</label>
+        </div>
+      </div>
+      <div class="field full"><label>Catatan</label><textarea id="note" rows="3" placeholder="Kebutuhan khusus, waktu kedatangan, konsep trip, dll."></textarea></div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="agents">
+      <div class="agent"><strong>AL</strong><div class="meta">087781998529</div><button class="btn primary wa" data-agent="AL" data-number="6287781998529">💬 Hubungi AL</button></div>
+      <div class="agent"><strong>Hendra</strong><div class="meta">087740137252</div><button class="btn primary wa" data-agent="Hendra" data-number="6287740137252">💬 Hubungi Hendra</button></div>
+    </div>
+  </div>
+</div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const properties = [{"id": 1, "name": "Baleva Kuta Garden Villa", "type": "Villa", "region": "Lombok Tengah", "area": "Kuta • Pujut", "lat": -8.917, "lng": 116.283, "exp": ["Slow Living", "Cooking Class"], "near": "Pantai Kuta"}, {"id": 2, "name": "Mandalika Hills Stay", "type": "Villa", "region": "Lombok Tengah", "area": "Kuta • Pujut", "lat": -8.9, "lng": 116.29, "exp": ["Honeymoon", "Trip Lombok"], "near": "Mandalika"}, {"id": 3, "name": "Tanjung Aan Family House", "type": "Homestay", "region": "Lombok Tengah", "area": "Pujut", "lat": -8.905, "lng": 116.33, "exp": ["Family Stay", "Surf"], "near": "Tanjung Aan"}, {"id": 4, "name": "Selong Belanak Slow Stay", "type": "Villa", "region": "Lombok Tengah", "area": "Praya Barat", "lat": -8.87, "lng": 116.165, "exp": ["Slow Living", "Surf"], "near": "Selong Belanak"}, {"id": 5, "name": "Senggigi Sunset Villa", "type": "Villa", "region": "Lombok Barat", "area": "Batu Layar • Senggigi", "lat": -8.4855, "lng": 116.0473, "exp": ["Honeymoon", "Wellness"], "near": "Pantai Senggigi"}, {"id": 6, "name": "Batu Layar Local Homestay", "type": "Homestay", "region": "Lombok Barat", "area": "Batu Layar", "lat": -8.51, "lng": 116.06, "exp": ["Local Experience", "Cooking Class"], "near": "Senggigi"}, {"id": 7, "name": "Sekotong Island Lodge", "type": "Lodge", "region": "Lombok Barat", "area": "Sekotong", "lat": -8.73, "lng": 116.03, "exp": ["Island Trip", "Snorkeling"], "near": "Sekotong"}, {"id": 8, "name": "Lembar Transit House", "type": "Guest House", "region": "Lombok Barat", "area": "Lembar", "lat": -8.73, "lng": 116.08, "exp": ["Regular Stay", "Transport"], "near": "Pelabuhan Lembar"}, {"id": 9, "name": "Sembalun Farm Stay", "type": "Farm Stay", "region": "Lombok Timur", "area": "Sembalun", "lat": -8.3787, "lng": 116.4902, "exp": ["Agrowisata", "Slow Living"], "near": "Sembalun"}, {"id": 10, "name": "Rinjani View Cottage", "type": "Cottage", "region": "Lombok Timur", "area": "Sembalun", "lat": -8.365, "lng": 116.51, "exp": ["Trekking", "Agrowisata"], "near": "Rinjani"}, {"id": 11, "name": "Tetebatu Green Homestay", "type": "Homestay", "region": "Lombok Timur", "area": "Tetebatu • Sikur", "lat": -8.555, "lng": 116.42, "exp": ["Slow Living", "Local Experience"], "near": "Tetebatu"}, {"id": 12, "name": "Jerowaru Coastal Stay", "type": "Bungalow", "region": "Lombok Timur", "area": "Jerowaru", "lat": -8.78, "lng": 116.48, "exp": ["Beach", "Island Trip"], "near": "Jerowaru"}, {"id": 13, "name": "Senaru Rinjani Lodge", "type": "Lodge", "region": "Lombok Utara", "area": "Bayan • Senaru", "lat": -8.290826, "lng": 116.402626, "exp": ["Trekking", "Adventure"], "near": "Senaru"}, {"id": 14, "name": "Tanjung North Lombok Villa", "type": "Villa", "region": "Lombok Utara", "area": "Tanjung", "lat": -8.355, "lng": 116.155, "exp": ["Family Stay", "Wellness"], "near": "Tanjung"}, {"id": 15, "name": "Pemenang Island Transit", "type": "Guest House", "region": "Lombok Utara", "area": "Pemenang", "lat": -8.41, "lng": 116.105, "exp": ["Island Trip", "Transport"], "near": "Bangsal"}, {"id": 16, "name": "Bayan Heritage Homestay", "type": "Homestay", "region": "Lombok Utara", "area": "Bayan", "lat": -8.27, "lng": 116.425, "exp": ["Cultural Experience", "Slow Living"], "near": "Bayan"}, {"id": 17, "name": "Mataram City Stay", "type": "Hotel", "region": "Kota Mataram", "area": "Mataram", "lat": -8.5833, "lng": 116.1167, "exp": ["Business Stay", "City Trip"], "near": "Pusat Kota"}, {"id": 18, "name": "Cakranegara Guest House", "type": "Guest House", "region": "Kota Mataram", "area": "Cakranegara", "lat": -8.59, "lng": 116.135, "exp": ["Regular Stay", "Culinary"], "near": "Cakranegara"}, {"id": 19, "name": "Ampenan Heritage Stay", "type": "Homestay", "region": "Kota Mataram", "area": "Ampenan", "lat": -8.57, "lng": 116.075, "exp": ["Heritage", "Culinary"], "near": "Kota Tua Ampenan"}, {"id": 20, "name": "Sekarbela Family Residence", "type": "Property Rental", "region": "Kota Mataram", "area": "Sekarbela", "lat": -8.6, "lng": 116.09, "exp": ["Family Stay", "Long Stay"], "near": "Sekarbela"}, {"id": 21, "name": "Gerung Garden House", "type": "Property Rental", "region": "Lombok Barat", "area": "Gerung", "lat": -8.675, "lng": 116.125, "exp": ["Long Stay", "Family Stay"], "near": "Gerung"}, {"id": 22, "name": "Praya Airport Homestay", "type": "Homestay", "region": "Lombok Tengah", "area": "Praya", "lat": -8.705, "lng": 116.27, "exp": ["Transit", "Airport Transfer"], "near": "Bandara Lombok"}, {"id": 23, "name": "Sambelia Coastal Cottage", "type": "Cottage", "region": "Lombok Timur", "area": "Sambelia", "lat": -8.3, "lng": 116.65, "exp": ["Island Trip", "Slow Living"], "near": "Sambelia"}, {"id": 24, "name": "Kayangan Local Stay", "type": "Pondok", "region": "Lombok Utara", "area": "Kayangan", "lat": -8.255, "lng": 116.28, "exp": ["Local Experience", "Slow Living"], "near": "Kayangan"}];
+let region='all', selected=properties[0], map=null, layer=null;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function filtered(){
+  const q=$('q').value.trim().toLowerCase();
+  return properties.filter(p=>{
+    const blob=[p.name,p.type,p.region,p.area,p.near,...p.exp].join(' ').toLowerCase();
+    return (region==='all'||p.region===region)&&($('type').value==='all'||p.type===$('type').value)&&($('experienceFilter').value==='all'||p.exp.includes($('experienceFilter').value))&&(!q||blob.includes(q));
+  });
+}
+function render(){
+  const data=filtered();
+  $('count').textContent=data.length+' property demo';
+  $('grid').innerHTML=data.map(p=>`<article class="card">
+    <div class="media"><span class="badge">${esc(p.type)}</span><button class="fav">♡</button></div>
+    <div class="body"><h3>${esc(p.name)}</h3><div class="meta">${esc(p.area)} • ${esc(p.region)}</div>
+    <div class="tags">${p.exp.slice(0,2).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div>
+    <div class="near">📍 Dekat ${esc(p.near)}</div>
+    <div class="card-actions"><button class="btn outline detail" data-id="${p.id}">Lihat Detail</button><button class="btn primary req" data-id="${p.id}">Cek Tersedia</button></div></div>
+  </article>`).join('') || '<p>Tidak ada hasil.</p>';
+  document.querySelectorAll('.req').forEach(b=>b.addEventListener('click',()=>openReq(Number(b.dataset.id))));
+  document.querySelectorAll('.detail').forEach(b=>b.addEventListener('click',()=>openDetail(Number(b.dataset.id))));
+  refreshMap(data);
+}
+document.querySelectorAll('#regionChips .chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#regionChips .chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');region=b.dataset.region;render();}));
+$('searchBtn').addEventListener('click',render);$('q').addEventListener('keydown',e=>{if(e.key==='Enter')render();});$('type').addEventListener('change',render);$('experienceFilter').addEventListener('change',render);
+
+function showMap(){
+  $('mapSection').classList.add('show');$('toggleMap').textContent='✕ Tutup Peta';initMap();setTimeout(()=>map.invalidateSize(),120);$('mapSection').scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('toggleMap').addEventListener('click',()=>{if($('mapSection').classList.contains('show')){$('mapSection').classList.remove('show');$('toggleMap').textContent='🗺 Lihat Peta';}else showMap();});
+$('mapTop').addEventListener('click',showMap);
+function initMap(){
+  if(map)return;
+  map=L.map('map').setView([-8.65,116.32],9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  layer=L.layerGroup().addTo(map);refreshMap(filtered());
+}
+function refreshMap(data){if(!layer)return;layer.clearLayers();data.forEach(p=>L.marker([p.lat,p.lng]).addTo(layer).bindPopup('<strong>'+esc(p.name)+'</strong><br>'+esc(p.area)+'<br><small>Titik demo area.</small>'));}
+
+
+function openDetail(id){
+  selected=properties.find(x=>x.id===id)||properties[0];
+  if(!selected) return;
+
+  $('detailName').textContent=selected.name||'Detail Property';
+  $('detailMeta').textContent=[selected.area,selected.region].filter(Boolean).join(' • ');
+  $('detailType').textContent=selected.type||'Property';
+  $('detailRegion').textContent=selected.region||'-';
+  $('detailDescription').textContent=selected.desc||'Deskripsi lengkap property belum tersedia.';
+  $('detailExperiences').innerHTML=(selected.exp||[]).length
+    ? selected.exp.map(x=>`<span class="tag">${esc(x)}</span>`).join('')
+    : '<span class="meta">Experience belum tersedia.</span>';
+  $('detailNear').textContent=selected.near ? 'Dekat '+selected.near : 'Informasi akses terdekat belum tersedia.';
+  $('detailCoords').textContent=(selected.lat!=null && selected.lng!=null)
+    ? selected.lat+', '+selected.lng
+    : 'Koordinat belum tersedia.';
+
+  $('detailModal').classList.add('show');
+}
+
+$('detailClose').addEventListener('click',()=>$('detailModal').classList.remove('show'));
+$('detailModal').addEventListener('click',e=>{
+  if(e.target===$('detailModal')) $('detailModal').classList.remove('show');
+});
+
+$('detailAvailabilityBtn').addEventListener('click',()=>{
+  $('detailModal').classList.remove('show');
+  if(selected) openReq(selected.id);
+});
+
+$('detailMapBtn').addEventListener('click',()=>{
+  $('detailModal').classList.remove('show');
+  showMap();
+  if(map && selected && selected.lat!=null && selected.lng!=null){
+    setTimeout(()=>{
+      map.setView([selected.lat,selected.lng],13);
+      L.popup()
+        .setLatLng([selected.lat,selected.lng])
+        .setContent('<strong>'+esc(selected.name)+'</strong><br>'+esc(selected.area||''))
+        .openOn(map);
+    },180);
+  }
+});
+
+function openReq(id){
+  selected=properties.find(x=>x.id===id)||properties[0];$('modalName').textContent=selected.name+' • '+selected.area;$('modal').classList.add('show');updateSummary();
+}
+$('generalReq').addEventListener('click',()=>openReq(properties[0].id));$('close').addEventListener('click',()=>$('modal').classList.remove('show'));$('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show');});
+function nights(){const a=$('checkin').value,b=$('checkout').value;if(!a||!b)return 0;const n=Math.round((new Date(b)-new Date(a))/86400000);return n>0?n:0}
+function extras(){return [...document.querySelectorAll('#extras input:checked')].map(x=>x.value)}
+function updateSummary(){$('summary').textContent=`${selected.name}
+${$('checkin').value||'-'} → ${$('checkout').value||'-'} • ${nights()} malam
+${$('adults').value} dewasa • ${$('children').value} anak • ${$('rooms').value} kamar
+Konsep: ${$('concept').value}
+Tambahan: ${extras().join(', ')||'-'}`;}
+['checkin','checkout','adults','children','rooms','concept','note'].forEach(id=>$(id).addEventListener('input',updateSummary));document.querySelectorAll('#extras input').forEach(x=>x.addEventListener('change',updateSummary));
+document.querySelectorAll('.wa').forEach(b=>b.addEventListener('click',()=>{
+  if(!$('checkin').value||!$('checkout').value||nights()<=0){alert('Isi check-in dan check-out yang valid terlebih dahulu.');return;}
+  const msg=`Halo Kak ${b.dataset.agent},
+
+Saya ingin mengecek ketersediaan melalui BALEVA.
+
+🏡 Properti: ${selected.name}
+📍 Lokasi: ${selected.area}, ${selected.region}
+📅 Check-in: ${$('checkin').value}
+📅 Check-out: ${$('checkout').value}
+🌙 Durasi: ${nights()} malam
+👥 Tamu: ${$('adults').value} dewasa, ${$('children').value} anak
+🛏 Kamar: ${$('rooms').value}
+🌿 Konsep Menginap: ${$('concept').value}
+✨ Tambahan: ${extras().join(', ')||'-'}
+📝 Catatan: ${$('note').value||'-'}
+
+Mohon dibantu pengecekan ketersediaan, harga, dan detail pemesanannya. Terima kasih.`;
+  window.open('https://wa.me/'+b.dataset.number+'?text='+encodeURIComponent(msg),'_blank','noopener');
+}));
+render();
+</script>
+</body>
+</html>
