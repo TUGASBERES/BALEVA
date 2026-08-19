@@ -207,21 +207,74 @@
 </div></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
 <script>
-const properties = [{"id": 1, "name": "Baleva Kuta Garden Villa", "type": "Villa", "region": "Lombok Tengah", "area": "Kuta • Pujut", "lat": -8.917, "lng": 116.283, "exp": ["Slow Living", "Cooking Class"], "near": "Pantai Kuta"}, {"id": 2, "name": "Mandalika Hills Stay", "type": "Villa", "region": "Lombok Tengah", "area": "Kuta • Pujut", "lat": -8.9, "lng": 116.29, "exp": ["Honeymoon", "Trip Lombok"], "near": "Mandalika"}, {"id": 3, "name": "Tanjung Aan Family House", "type": "Homestay", "region": "Lombok Tengah", "area": "Pujut", "lat": -8.905, "lng": 116.33, "exp": ["Family Stay", "Surf"], "near": "Tanjung Aan"}, {"id": 4, "name": "Selong Belanak Slow Stay", "type": "Villa", "region": "Lombok Tengah", "area": "Praya Barat", "lat": -8.87, "lng": 116.165, "exp": ["Slow Living", "Surf"], "near": "Selong Belanak"}, {"id": 5, "name": "Senggigi Sunset Villa", "type": "Villa", "region": "Lombok Barat", "area": "Batu Layar • Senggigi", "lat": -8.4855, "lng": 116.0473, "exp": ["Honeymoon", "Wellness"], "near": "Pantai Senggigi"}, {"id": 6, "name": "Batu Layar Local Homestay", "type": "Homestay", "region": "Lombok Barat", "area": "Batu Layar", "lat": -8.51, "lng": 116.06, "exp": ["Local Experience", "Cooking Class"], "near": "Senggigi"}, {"id": 7, "name": "Sekotong Island Lodge", "type": "Lodge", "region": "Lombok Barat", "area": "Sekotong", "lat": -8.73, "lng": 116.03, "exp": ["Island Trip", "Snorkeling"], "near": "Sekotong"}, {"id": 8, "name": "Lembar Transit House", "type": "Guest House", "region": "Lombok Barat", "area": "Lembar", "lat": -8.73, "lng": 116.08, "exp": ["Regular Stay", "Transport"], "near": "Pelabuhan Lembar"}, {"id": 9, "name": "Sembalun Farm Stay", "type": "Farm Stay", "region": "Lombok Timur", "area": "Sembalun", "lat": -8.3787, "lng": 116.4902, "exp": ["Agrowisata", "Slow Living"], "near": "Sembalun"}, {"id": 10, "name": "Rinjani View Cottage", "type": "Cottage", "region": "Lombok Timur", "area": "Sembalun", "lat": -8.365, "lng": 116.51, "exp": ["Trekking", "Agrowisata"], "near": "Rinjani"}, {"id": 11, "name": "Tetebatu Green Homestay", "type": "Homestay", "region": "Lombok Timur", "area": "Tetebatu • Sikur", "lat": -8.555, "lng": 116.42, "exp": ["Slow Living", "Local Experience"], "near": "Tetebatu"}, {"id": 12, "name": "Jerowaru Coastal Stay", "type": "Bungalow", "region": "Lombok Timur", "area": "Jerowaru", "lat": -8.78, "lng": 116.48, "exp": ["Beach", "Island Trip"], "near": "Jerowaru"}, {"id": 13, "name": "Senaru Rinjani Lodge", "type": "Lodge", "region": "Lombok Utara", "area": "Bayan • Senaru", "lat": -8.290826, "lng": 116.402626, "exp": ["Trekking", "Adventure"], "near": "Senaru"}, {"id": 14, "name": "Tanjung North Lombok Villa", "type": "Villa", "region": "Lombok Utara", "area": "Tanjung", "lat": -8.355, "lng": 116.155, "exp": ["Family Stay", "Wellness"], "near": "Tanjung"}, {"id": 15, "name": "Pemenang Island Transit", "type": "Guest House", "region": "Lombok Utara", "area": "Pemenang", "lat": -8.41, "lng": 116.105, "exp": ["Island Trip", "Transport"], "near": "Bangsal"}, {"id": 16, "name": "Bayan Heritage Homestay", "type": "Homestay", "region": "Lombok Utara", "area": "Bayan", "lat": -8.27, "lng": 116.425, "exp": ["Cultural Experience", "Slow Living"], "near": "Bayan"}, {"id": 17, "name": "Mataram City Stay", "type": "Hotel", "region": "Kota Mataram", "area": "Mataram", "lat": -8.5833, "lng": 116.1167, "exp": ["Business Stay", "City Trip"], "near": "Pusat Kota"}, {"id": 18, "name": "Cakranegara Guest House", "type": "Guest House", "region": "Kota Mataram", "area": "Cakranegara", "lat": -8.59, "lng": 116.135, "exp": ["Regular Stay", "Culinary"], "near": "Cakranegara"}, {"id": 19, "name": "Ampenan Heritage Stay", "type": "Homestay", "region": "Kota Mataram", "area": "Ampenan", "lat": -8.57, "lng": 116.075, "exp": ["Heritage", "Culinary"], "near": "Kota Tua Ampenan"}, {"id": 20, "name": "Sekarbela Family Residence", "type": "Property Rental", "region": "Kota Mataram", "area": "Sekarbela", "lat": -8.6, "lng": 116.09, "exp": ["Family Stay", "Long Stay"], "near": "Sekarbela"}, {"id": 21, "name": "Gerung Garden House", "type": "Property Rental", "region": "Lombok Barat", "area": "Gerung", "lat": -8.675, "lng": 116.125, "exp": ["Long Stay", "Family Stay"], "near": "Gerung"}, {"id": 22, "name": "Praya Airport Homestay", "type": "Homestay", "region": "Lombok Tengah", "area": "Praya", "lat": -8.705, "lng": 116.27, "exp": ["Transit", "Airport Transfer"], "near": "Bandara Lombok"}, {"id": 23, "name": "Sambelia Coastal Cottage", "type": "Cottage", "region": "Lombok Timur", "area": "Sambelia", "lat": -8.3, "lng": 116.65, "exp": ["Island Trip", "Slow Living"], "near": "Sambelia"}, {"id": 24, "name": "Kayangan Local Stay", "type": "Pondok", "region": "Lombok Utara", "area": "Kayangan", "lat": -8.255, "lng": 116.28, "exp": ["Local Experience", "Slow Living"], "near": "Kayangan"}];
-let region='all', selected=properties[0], map=null, layer=null;
+let properties=[];
+let region='all', selected=null, map=null, layer=null;
 const $=id=>document.getElementById(id);
+
+const C=window.BALEVA_CONFIG||{};
+const db=(C.SUPABASE_URL && C.SUPABASE_PUBLISHABLE_KEY)
+  ? supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY)
+  : null;
+
+function normalizeProperty(p){
+  return {
+    id:p.id,
+    name:p.name||'Property',
+    type:p.property_type||p.type||'Property',
+    region:p.region||'',
+    area:p.area||p.address||'',
+    lat:p.latitude!=null ? Number(p.latitude) : (p.lat!=null ? Number(p.lat) : null),
+    lng:p.longitude!=null ? Number(p.longitude) : (p.lng!=null ? Number(p.lng) : null),
+    exp:Array.isArray(p.experiences) ? p.experiences : [],
+    near:p.near||p.area||p.address||'',
+    desc:p.description||p.desc||'',
+    image_url:p.image_url||'',
+    image_urls:Array.isArray(p.image_urls) ? p.image_urls : [],
+    uploaded_image_urls:Array.isArray(p.uploaded_image_urls) ? p.uploaded_image_urls : []
+  };
+}
+
+async function loadProperties(){
+  if(!db){
+    console.error('Supabase belum dikonfigurasi di config.js');
+    properties=[];
+    selected=null;
+    render();
+    return;
+  }
+
+  const {data,error}=await db
+    .from('properties')
+    .select('*')
+    .eq('status','published')
+    .order('created_at',{ascending:false});
+
+  if(error){
+    console.error('Gagal mengambil property dari Supabase:',error);
+    properties=[];
+    selected=null;
+    render();
+    return;
+  }
+
+  properties=(data||[]).map(normalizeProperty);
+  selected=properties[0]||null;
+  render();
+}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function filtered(){
   const q=$('q').value.trim().toLowerCase();
   return properties.filter(p=>{
-    const blob=[p.name,p.type,p.region,p.area,p.near,...p.exp].join(' ').toLowerCase();
-    return (region==='all'||p.region===region)&&($('type').value==='all'||p.type===$('type').value)&&($('experienceFilter').value==='all'||p.exp.includes($('experienceFilter').value))&&(!q||blob.includes(q));
+    const blob=[p.name,p.type,p.region,p.area,p.near,...(p.exp||[])].join(' ').toLowerCase();
+    return (region==='all'||p.region===region)&&($('type').value==='all'||p.type===$('type').value)&&($('experienceFilter').value==='all'||(p.exp||[]).includes($('experienceFilter').value))&&(!q||blob.includes(q));
   });
 }
 function render(){
   const data=filtered();
-  $('count').textContent=data.length+' property demo';
+  $('count').textContent=data.length+' property';
   $('grid').innerHTML=data.map(p=>`<article class="card">
     <div class="media"><span class="badge">${esc(p.type)}</span><button class="fav">♡</button></div>
     <div class="body"><h3>${esc(p.name)}</h3><div class="meta">${esc(p.area)} • ${esc(p.region)}</div>
@@ -247,7 +300,7 @@ function initMap(){
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   layer=L.layerGroup().addTo(map);refreshMap(filtered());
 }
-function refreshMap(data){if(!layer)return;layer.clearLayers();data.forEach(p=>L.marker([p.lat,p.lng]).addTo(layer).bindPopup('<strong>'+esc(p.name)+'</strong><br>'+esc(p.area)+'<br><small>Titik demo area.</small>'));}
+function refreshMap(data){if(!layer)return;layer.clearLayers();data.filter(p=>p.lat!=null&&p.lng!=null).forEach(p=>L.marker([p.lat,p.lng]).addTo(layer).bindPopup('<strong>'+esc(p.name)+'</strong><br>'+esc(p.area)));}
 
 
 function openDetail(id){
@@ -295,9 +348,13 @@ $('detailMapBtn').addEventListener('click',()=>{
 });
 
 function openReq(id){
-  selected=properties.find(x=>x.id===id)||properties[0];$('modalName').textContent=selected.name+' • '+selected.area;$('modal').classList.add('show');updateSummary();
+  selected=properties.find(x=>x.id===id)||properties[0]||null;
+  if(!selected){alert('Belum ada property published.');return;}
+  $('modalName').textContent=selected.name+' • '+selected.area;
+  $('modal').classList.add('show');
+  updateSummary();
 }
-$('generalReq').addEventListener('click',()=>openReq(properties[0].id));$('close').addEventListener('click',()=>$('modal').classList.remove('show'));$('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show');});
+$('generalReq').addEventListener('click',()=>{if(properties[0])openReq(properties[0].id);else alert('Belum ada property published.');});$('close').addEventListener('click',()=>$('modal').classList.remove('show'));$('modal').addEventListener('click',e=>{if(e.target===$('modal'))$('modal').classList.remove('show');});
 function nights(){const a=$('checkin').value,b=$('checkout').value;if(!a||!b)return 0;const n=Math.round((new Date(b)-new Date(a))/86400000);return n>0?n:0}
 function extras(){return [...document.querySelectorAll('#extras input:checked')].map(x=>x.value)}
 function updateSummary(){$('summary').textContent=`${selected.name}
@@ -326,7 +383,7 @@ Saya ingin mengecek ketersediaan melalui BALEVA.
 Mohon dibantu pengecekan ketersediaan, harga, dan detail pemesanannya. Terima kasih.`;
   window.open('https://wa.me/'+b.dataset.number+'?text='+encodeURIComponent(msg),'_blank','noopener');
 }));
-render();
+loadProperties();
 </script>
 </body>
 </html>
