@@ -15,7 +15,7 @@
 .search{display:flex;gap:8px;background:#fff;border:1px solid var(--line);padding:8px;border-radius:16px;box-shadow:var(--shadow);max-width:780px}.search input{flex:1;border:0;outline:0;padding:10px;min-width:0}.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:13px}.chip.active{background:var(--teal);border-color:var(--teal);color:#fff}
 .toolbar{position:sticky;top:78px;z-index:40;background:rgba(247,249,249,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}.toolbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:11px 0}.toolbar select{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff}.count{margin-left:auto;color:var(--muted);font-size:14px}
 .section{padding:40px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:18px}h2{margin:0;font-size:28px;color:#123f46}.sub{color:var(--muted);margin:5px 0 0}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 5px 18px rgba(0,60,70,.06)}.media{height:176px;position:relative;overflow:hidden;background:linear-gradient(135deg,#81d3df,#ffca55)}.media:before{content:"";position:absolute;inset:18% 8% -4%;background:linear-gradient(135deg,#087a88,#0a4d71);clip-path:polygon(0 100%,30% 34%,50% 57%,68% 14%,100% 100%)}.media:after{content:"";position:absolute;left:-10%;bottom:-28px;width:120%;height:58px;border-radius:50%;background:#fff}.badge{position:absolute;left:10px;top:10px;z-index:2;background:#fff;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}.fav{position:absolute;right:10px;top:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#fff;font-size:18px}.body{padding:14px;display:flex;flex-direction:column;flex:1}.body h3{font-size:17px;margin:0 0 5px}.meta{font-size:12px;color:var(--muted)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.tag{font-size:11px;border-radius:999px;padding:5px 7px;background:#e8f7f7;color:#075f69}.near{font-size:12px;color:var(--muted);margin-top:auto}.card-actions{display:flex;gap:8px;margin-top:12px}.card-actions .btn{flex:1;padding:9px 8px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 5px 18px rgba(0,60,70,.06)}.media{height:176px;position:relative;overflow:hidden;background:linear-gradient(135deg,#81d3df,#ffca55)}.media:before{content:"";position:absolute;inset:18% 8% -4%;background:linear-gradient(135deg,#087a88,#0a4d71);clip-path:polygon(0 100%,30% 34%,50% 57%,68% 14%,100% 100%)}.media:after{content:"";position:absolute;left:-10%;bottom:-28px;width:120%;height:58px;border-radius:50%;background:#fff}.media.has-photo:before,.media.has-photo:after{display:none}.media>img{width:100%;height:100%;object-fit:cover;display:block}.detail-gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.detail-gallery>img{flex:0 0 100%;scroll-snap-align:start}.badge{position:absolute;left:10px;top:10px;z-index:2;background:#fff;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}.fav{position:absolute;right:10px;top:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#fff;font-size:18px}.body{padding:14px;display:flex;flex-direction:column;flex:1}.body h3{font-size:17px;margin:0 0 5px}.meta{font-size:12px;color:var(--muted)}.tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.tag{font-size:11px;border-radius:999px;padding:5px 7px;background:#e8f7f7;color:#075f69}.near{font-size:12px;color:var(--muted);margin-top:auto}.card-actions{display:flex;gap:8px;margin-top:12px}.card-actions .btn{flex:1;padding:9px 8px;font-size:12px}
 .mapbox{display:none;margin-top:18px;border-radius:17px;overflow:hidden;border:1px solid var(--line);background:#fff}.mapbox.show{display:block}#map{height:500px}
 .regions{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.region{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.region strong{display:block;font-size:18px;color:var(--teal);margin-bottom:5px}
 .experience{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.exp{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}.exp b{display:block;margin-top:5px}.icon{font-size:28px}
@@ -132,7 +132,7 @@
     </div>
 
     <div class="modal-body">
-      <div class="media" style="height:260px;border-radius:14px;margin-bottom:18px;"></div>
+      <div class="media" id="detailMedia" style="height:260px;border-radius:14px;margin-bottom:18px;"></div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
         <div style="border:1px solid var(--line);border-radius:12px;padding:13px;">
@@ -265,6 +265,18 @@ async function loadProperties(){
   render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function getPhotos(p){
+  const list=[
+    p?.image_url,
+    ...(Array.isArray(p?.image_urls)?p.image_urls:[]),
+    ...(Array.isArray(p?.uploaded_image_urls)?p.uploaded_image_urls:[])
+  ]
+  .map(x=>String(x||'').trim())
+  .filter(Boolean);
+
+  return [...new Set(list)];
+}
+
 function filtered(){
   const q=$('q').value.trim().toLowerCase();
   return properties.filter(p=>{
@@ -275,13 +287,16 @@ function filtered(){
 function render(){
   const data=filtered();
   $('count').textContent=data.length+' property';
-  $('grid').innerHTML=data.map(p=>`<article class="card">
-    <div class="media"><span class="badge">${esc(p.type)}</span><button class="fav">♡</button></div>
+  $('grid').innerHTML=data.map(p=>{
+    const photos=getPhotos(p);
+    return `<article class="card">
+    <div class="media ${photos.length?'has-photo':''}">${photos.length?`<img src="${esc(photos[0])}" alt="${esc(p.name)}" loading="lazy">`:''}<span class="badge">${esc(p.type)}</span><button class="fav">♡</button></div>
     <div class="body"><h3>${esc(p.name)}</h3><div class="meta">${esc(p.area)} • ${esc(p.region)}</div>
     <div class="tags">${p.exp.slice(0,2).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div>
     <div class="near">📍 Dekat ${esc(p.near)}</div>
     <div class="card-actions"><button class="btn outline detail" data-id="${p.id}">Lihat Detail</button><button class="btn primary req" data-id="${p.id}">Cek Tersedia</button></div></div>
-  </article>`).join('') || '<p>Tidak ada hasil.</p>';
+  </article>`;
+  }).join('') || '<p>Tidak ada hasil.</p>';
   document.querySelectorAll('.req').forEach(b=>b.addEventListener('click',()=>openReq(Number(b.dataset.id))));
   document.querySelectorAll('.detail').forEach(b=>b.addEventListener('click',()=>openDetail(Number(b.dataset.id))));
   refreshMap(data);
@@ -319,6 +334,12 @@ function openDetail(id){
   $('detailCoords').textContent=(selected.lat!=null && selected.lng!=null)
     ? selected.lat+', '+selected.lng
     : 'Koordinat belum tersedia.';
+
+  const photos=getPhotos(selected);
+  $('detailMedia').className='media'+(photos.length?' has-photo detail-gallery':'');
+  $('detailMedia').innerHTML=photos.length
+    ? photos.map((url,i)=>`<img src="${esc(url)}" alt="${esc(selected.name)} - Foto ${i+1}" loading="${i===0?'eager':'lazy'}">`).join('')
+    : '';
 
   $('detailModal').classList.add('show');
 }
