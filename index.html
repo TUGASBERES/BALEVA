@@ -184,17 +184,8 @@
       <div class="field"><label>Anak</label><input type="number" id="children" value="0" min="0"></div>
       <div class="field"><label>Jumlah Kamar</label><input type="number" id="rooms" value="1" min="1"></div>
       <div class="field"><label>Konsep Menginap</label><select id="concept"><option>Regular Stay</option><option>Slow Living</option><option>Agrowisata</option><option>Family Stay</option><option>Honeymoon</option><option>Workation</option><option>Adventure Stay</option></select></div>
-      <div class="field full"><label>Kebutuhan Tambahan</label>
-        <div class="checks" id="extras">
-          <label><input type="checkbox" value="Trip Lombok"> Trip Lombok</label>
-          <label><input type="checkbox" value="Cooking Class"> Cooking Class</label>
-          <label><input type="checkbox" value="Airport Transfer"> Airport Transfer</label>
-          <label><input type="checkbox" value="Sewa Mobil"> Sewa Mobil</label>
-          <label><input type="checkbox" value="Sewa Motor"> Sewa Motor</label>
-          <label><input type="checkbox" value="Local Guide"> Local Guide</label>
-          <label><input type="checkbox" value="Trekking"> Trekking</label>
-          <label><input type="checkbox" value="Snorkeling"> Snorkeling</label>
-        </div>
+      <div class="field full" id="extrasField"><label>Kebutuhan Tambahan</label>
+        <div class="checks" id="extras"></div>
       </div>
       <div class="field full"><label>Catatan</label><textarea id="note" rows="3" placeholder="Kebutuhan khusus, waktu kedatangan, konsep trip, dll."></textarea></div>
     </div>
@@ -233,7 +224,8 @@ function normalizeProperty(p){
     desc:p.description||p.desc||'',
     image_url:p.image_url||'',
     image_urls:Array.isArray(p.image_urls) ? p.image_urls : [],
-    uploaded_image_urls:Array.isArray(p.uploaded_image_urls) ? p.uploaded_image_urls : []
+    uploaded_image_urls:Array.isArray(p.uploaded_image_urls) ? p.uploaded_image_urls : [],
+    extra_facilities:Array.isArray(p.extra_facilities) ? p.extra_facilities : []
   };
 }
 
@@ -368,10 +360,33 @@ $('detailMapBtn').addEventListener('click',()=>{
   }
 });
 
+
+function renderExtraFacilities(){
+  const facilities=Array.isArray(selected?.extra_facilities)
+    ? selected.extra_facilities.filter(Boolean)
+    : [];
+
+  if(!facilities.length){
+    $('extras').innerHTML='';
+    $('extrasField').style.display='none';
+    return;
+  }
+
+  $('extrasField').style.display='';
+  $('extras').innerHTML=facilities.map(item=>`
+    <label><input type="checkbox" value="${esc(item)}"> ${esc(item)}</label>
+  `).join('');
+
+  document.querySelectorAll('#extras input').forEach(input=>{
+    input.addEventListener('change',updateSummary);
+  });
+}
+
 function openReq(id){
   selected=properties.find(x=>x.id===id)||properties[0]||null;
   if(!selected){alert('Belum ada property published.');return;}
   $('modalName').textContent=selected.name+' • '+selected.area;
+  renderExtraFacilities();
   $('modal').classList.add('show');
   updateSummary();
 }
@@ -383,7 +398,7 @@ ${$('checkin').value||'-'} → ${$('checkout').value||'-'} • ${nights()} malam
 ${$('adults').value} dewasa • ${$('children').value} anak • ${$('rooms').value} kamar
 Konsep: ${$('concept').value}
 Tambahan: ${extras().join(', ')||'-'}`;}
-['checkin','checkout','adults','children','rooms','concept','note'].forEach(id=>$(id).addEventListener('input',updateSummary));document.querySelectorAll('#extras input').forEach(x=>x.addEventListener('change',updateSummary));
+['checkin','checkout','adults','children','rooms','concept','note'].forEach(id=>$(id).addEventListener('input',updateSummary));
 document.querySelectorAll('.wa').forEach(b=>b.addEventListener('click',()=>{
   if(!$('checkin').value||!$('checkout').value||nights()<=0){alert('Isi check-in dan check-out yang valid terlebih dahulu.');return;}
   const msg=`Halo Kak ${b.dataset.agent},
