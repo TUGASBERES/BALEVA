@@ -1,7 +1,7 @@
 // BALEVA — CUKUP EDIT 2 NILAI SUPABASE DI BAWAH
 window.BALEVA_CONFIG = {
-  SUPABASE_URL: "https://aulgjtcvxokitssrttxb.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY: "sb_publishable_hC4pOzTA-DV_ReZ1zSlsPg__vhhpacr",
+  SUPABASE_URL: "https://vigfudtyfytrxwmvtyqr.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY: "sb_publishable_Jc5IVeRvUeIKMcgo91VjeQ_vBjaSe0e",
 
   WHATSAPP_AL: "6287781998529",
   WHATSAPP_HENDRA: "6287740137252",
