@@ -123,6 +123,20 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}b
 <div class="field"><label>Longitude</label><input id="lng" type="number" step="any"></div>
 <div class="field full"><label>Experience — pisahkan dengan koma</label><input id="experiences" placeholder="Slow Living, Cooking Class, Agrowisata"></div>
 <div class="field full"><label>Deskripsi</label><textarea id="desc" rows="4"></textarea></div>
+<div class="field full">
+  <label>Fasilitas Tambahan — pilih yang tersedia untuk property ini</label>
+  <div id="extraFacilitiesAdmin" style="display:flex;gap:8px;flex-wrap:wrap">
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Trip Lombok"> Trip Lombok</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Cooking Class"> Cooking Class</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Airport Transfer"> Airport Transfer</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Sewa Mobil"> Sewa Mobil</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Sewa Motor"> Sewa Motor</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Local Guide"> Local Guide</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Trekking"> Trekking</label>
+    <label style="border:1px solid var(--line);border-radius:999px;padding:7px 9px;font-size:12px"><input type="checkbox" value="Snorkeling"> Snorkeling</label>
+  </div>
+  <div class="muted small" style="margin-top:6px">Jika tidak dicentang, fasilitas tersebut tidak akan muncul pada form booking.</div>
+</div>
 <div class="field full"><label>URL Booking.com — opsional</label><input id="booking" placeholder="https://www.booking.com/..."></div>
 <div class="field full"><label>URL Foto Utama — opsional</label><input id="imageUrl" placeholder="https://..."></div>
 <div class="field full">
@@ -523,11 +537,24 @@ async function uploadPendingPhotos(folderKey){
   return uploaded;
 }
 
+
+function getAdminExtraFacilities(){
+  return [...document.querySelectorAll('#extraFacilitiesAdmin input:checked')].map(x=>x.value);
+}
+
+function setAdminExtraFacilities(values){
+  const selected=new Set(Array.isArray(values)?values:[]);
+  document.querySelectorAll('#extraFacilitiesAdmin input').forEach(input=>{
+    input.checked=selected.has(input.value);
+  });
+}
+
 function clearForm(){
   $('editId').value='';
   $('name').value=''; $('ptype').value='Villa'; $('region').value='Lombok Tengah';
   $('area').value=''; $('address').value=''; $('lat').value=''; $('lng').value='';
   $('experiences').value=''; $('desc').value=''; $('booking').value='';
+  setAdminExtraFacilities([]);
   resetPhotoControls();
   $('status').value='draft'; $('saveMsg').textContent='';
   $('formTitle').textContent='Tambahkan Property Manual';
@@ -554,6 +581,7 @@ function openEdit(id){
   $('experiences').value=(p.experiences||[]).join(', ');
   $('desc').value=p.description||'';
   $('booking').value=p.booking_url||'';
+  setAdminExtraFacilities(p.extra_facilities||[]);
   loadPropertyPhotos(p);
   $('status').value=p.status||'draft';
   $('formTitle').textContent='Edit Property';
@@ -579,6 +607,7 @@ function prefillBooking(p){
   $('lng').value=p.longitude??p.lng??p.lon??'';
   $('desc').value=p.description||'';
   $('booking').value=p.url||p.booking_url||'';
+  setAdminExtraFacilities(Array.isArray(p.extra_facilities)?p.extra_facilities:[]);
   loadUrlPhotos([p.image_url||p.image||''].filter(Boolean));
   storedUploadedPhotoUrls=[];
   pendingPhotoFiles=[];
@@ -617,6 +646,7 @@ $('save').onclick=async()=>{
     experiences:$('experiences').value.split(',').map(x=>x.trim()).filter(Boolean),
     description:$('desc').value.trim(),
     booking_url:$('booking').value.trim(),
+    extra_facilities:getAdminExtraFacilities(),
     status:$('status').value
   };
 
