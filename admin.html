@@ -125,6 +125,20 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}b
 <div class="field full"><label>Deskripsi</label><textarea id="desc" rows="4"></textarea></div>
 <div class="field full"><label>URL Booking.com — opsional</label><input id="booking" placeholder="https://www.booking.com/..."></div>
 <div class="field full"><label>URL Foto Utama — opsional</label><input id="imageUrl" placeholder="https://..."></div>
+<div class="field full">
+  <div id="extraPhotoUrls"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px">
+    <button class="btn outline" id="addPhotoUrl" type="button">+ Tambah URL Foto</button>
+    <span class="muted small" id="urlPhotoCount">Maks. 10 URL foto.</span>
+  </div>
+</div>
+<div class="field full">
+  <label>Upload Foto JPG / JPEG / PNG — opsional</label>
+  <input id="photoFiles" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple>
+  <div class="muted small" style="margin-top:6px">Maks. 20 foto upload per property.</div>
+  <div id="storedPhotoList" style="margin-top:8px"></div>
+  <div id="filePhotoList" style="margin-top:8px"></div>
+</div>
 <div class="field"><label>Status</label><select id="status"><option value="draft">Draft</option><option value="published">Published</option></select></div>
 </div>
 
@@ -174,6 +188,11 @@ if(!configured) location.href='login.html';
 const db=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY);
 
 let allProps=[];
+let pendingPhotoFiles=[];
+let storedUploadedPhotoUrls=[];
+const PHOTO_BUCKET='property-images';
+const MAX_URL_PHOTOS=10;
+const MAX_UPLOAD_PHOTOS=20;
 const $=id=>document.getElementById(id);
 
 function esc(s){
@@ -322,11 +341,194 @@ async function searchBooking(){
   document.querySelectorAll('.bookingImport').forEach(b=>b.onclick=()=>prefillBooking(items[Number(b.dataset.i)]));
 }
 
+
+function cleanUrlList(value){
+  if(!Array.isArray(value)) return [];
+  return value.map(x=>String(x||'').trim()).filter(Boolean);
+}
+
+function getUrlPhotoInputs(){
+  return [$('imageUrl'), ...document.querySelectorAll('.extraPhotoUrl')].filter(Boolean);
+}
+
+function collectUrlPhotos(){
+  return getUrlPhotoInputs()
+    .map(input=>input.value.trim())
+    .filter(Boolean)
+    .slice(0,MAX_URL_PHOTOS);
+}
+
+function updateUrlPhotoCount(){
+  const slotCount=getUrlPhotoInputs().length;
+  const filledCount=collectUrlPhotos().length;
+  $('urlPhotoCount').textContent=`${filledCount} URL terisi • ${slotCount}/${MAX_URL_PHOTOS} slot`;
+  $('addPhotoUrl').disabled=slotCount>=MAX_URL_PHOTOS;
+}
+
+function addPhotoUrlField(value=''){
+  const current=getUrlPhotoInputs().length;
+  if(current>=MAX_URL_PHOTOS){
+    updateUrlPhotoCount();
+    return;
+  }
+
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;align-items:center;margin-top:8px';
+  row.innerHTML=`
+    <input class="extraPhotoUrl" placeholder="https://..." value="${esc(value)}">
+    <button class="btn outline removePhotoUrl" type="button">Hapus</button>
+  `;
+
+  row.querySelector('.extraPhotoUrl').oninput=updateUrlPhotoCount;
+  row.querySelector('.removePhotoUrl').onclick=()=>{
+    row.remove();
+    updateUrlPhotoCount();
+  };
+
+  $('extraPhotoUrls').appendChild(row);
+  updateUrlPhotoCount();
+}
+
+function loadUrlPhotos(urls){
+  $('extraPhotoUrls').innerHTML='';
+  const clean=cleanUrlList(urls).slice(0,MAX_URL_PHOTOS);
+  $('imageUrl').value=clean[0]||'';
+  clean.slice(1).forEach(url=>addPhotoUrlField(url));
+  updateUrlPhotoCount();
+}
+
+function isAllowedPhotoFile(file){
+  const type=String(file.type||'').toLowerCase();
+  const name=String(file.name||'').toLowerCase();
+  return type==='image/jpeg' || type==='image/png' ||
+         name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png');
+}
+
+function fileKey(file){
+  return [file.name,file.size,file.lastModified].join('::');
+}
+
+function renderPendingFiles(){
+  const box=$('filePhotoList');
+
+  if(!pendingPhotoFiles.length){
+    box.innerHTML='<div class="muted small">Belum ada foto baru dipilih.</div>';
+    return;
+  }
+
+  box.innerHTML=pendingPhotoFiles.map((file,i)=>`
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px">
+      <span class="small">${i+1}. ${esc(file.name)}</span>
+      <button class="btn outline removePendingPhoto" type="button" data-i="${i}" style="padding:6px 9px">Hapus</button>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.removePendingPhoto').forEach(btn=>{
+    btn.onclick=()=>{
+      pendingPhotoFiles.splice(Number(btn.dataset.i),1);
+      renderPendingFiles();
+    };
+  });
+}
+
+function renderStoredUploadedPhotos(){
+  const box=$('storedPhotoList');
+
+  if(!storedUploadedPhotoUrls.length){
+    box.innerHTML='';
+    return;
+  }
+
+  box.innerHTML=`
+    <div class="muted small" style="margin-bottom:4px">Foto upload yang sudah tersimpan:</div>
+    ${storedUploadedPhotoUrls.map((url,i)=>`
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:6px">
+        <span class="small" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i+1}. ${esc(url)}</span>
+        <button class="btn outline removeStoredPhoto" type="button" data-i="${i}" style="padding:6px 9px">Hapus</button>
+      </div>
+    `).join('')}
+  `;
+
+  document.querySelectorAll('.removeStoredPhoto').forEach(btn=>{
+    btn.onclick=()=>{
+      storedUploadedPhotoUrls.splice(Number(btn.dataset.i),1);
+      renderStoredUploadedPhotos();
+    };
+  });
+}
+
+function resetPhotoControls(){
+  pendingPhotoFiles=[];
+  storedUploadedPhotoUrls=[];
+  $('photoFiles').value='';
+  $('extraPhotoUrls').innerHTML='';
+  $('imageUrl').value='';
+  renderPendingFiles();
+  renderStoredUploadedPhotos();
+  updateUrlPhotoCount();
+}
+
+function loadPropertyPhotos(p){
+  const uploaded=cleanUrlList(p?.uploaded_image_urls);
+  storedUploadedPhotoUrls=uploaded.slice(0,MAX_UPLOAD_PHOTOS);
+
+  let urls=cleanUrlList(p?.image_urls);
+
+  // Kompatibilitas property lama yang hanya mempunyai image_url.
+  if(!urls.length && p?.image_url && !storedUploadedPhotoUrls.includes(String(p.image_url))){
+    urls=[String(p.image_url)];
+  }
+
+  loadUrlPhotos(urls);
+  pendingPhotoFiles=[];
+  $('photoFiles').value='';
+  renderPendingFiles();
+  renderStoredUploadedPhotos();
+}
+
+async function uploadPendingPhotos(folderKey){
+  if(!pendingPhotoFiles.length) return [];
+
+  const uploaded=[];
+
+  for(let i=0;i<pendingPhotoFiles.length;i++){
+    const file=pendingPhotoFiles[i];
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const safeBase=file.name
+      .replace(/\.[^.]+$/,'')
+      .replace(/[^a-zA-Z0-9_-]+/g,'-')
+      .replace(/^-+|-+$/g,'')
+      .slice(0,60) || 'photo';
+
+    const unique=(window.crypto && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const path=`${folderKey}/${unique}-${safeBase}.${ext}`;
+
+    const {error}=await db.storage
+      .from(PHOTO_BUCKET)
+      .upload(path,file,{
+        cacheControl:'3600',
+        upsert:false,
+        contentType:file.type || (ext==='png'?'image/png':'image/jpeg')
+      });
+
+    if(error) throw new Error(`Upload ${file.name} gagal: ${error.message}`);
+
+    const {data}=db.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+    if(data?.publicUrl) uploaded.push(data.publicUrl);
+  }
+
+  return uploaded;
+}
+
 function clearForm(){
   $('editId').value='';
   $('name').value=''; $('ptype').value='Villa'; $('region').value='Lombok Tengah';
   $('area').value=''; $('address').value=''; $('lat').value=''; $('lng').value='';
-  $('experiences').value=''; $('desc').value=''; $('booking').value=''; $('imageUrl').value='';
+  $('experiences').value=''; $('desc').value=''; $('booking').value='';
+  resetPhotoControls();
   $('status').value='draft'; $('saveMsg').textContent='';
   $('formTitle').textContent='Tambahkan Property Manual';
 }
@@ -352,7 +554,7 @@ function openEdit(id){
   $('experiences').value=(p.experiences||[]).join(', ');
   $('desc').value=p.description||'';
   $('booking').value=p.booking_url||'';
-  $('imageUrl').value=p.image_url||'';
+  loadPropertyPhotos(p);
   $('status').value=p.status||'draft';
   $('formTitle').textContent='Edit Property';
   $('manualPanel').classList.remove('hidden');
@@ -377,7 +579,12 @@ function prefillBooking(p){
   $('lng').value=p.longitude??p.lng??p.lon??'';
   $('desc').value=p.description||'';
   $('booking').value=p.url||p.booking_url||'';
-  $('imageUrl').value=p.image_url||p.image||'';
+  loadUrlPhotos([p.image_url||p.image||''].filter(Boolean));
+  storedUploadedPhotoUrls=[];
+  pendingPhotoFiles=[];
+  $('photoFiles').value='';
+  renderPendingFiles();
+  renderStoredUploadedPhotos();
   $('status').value='draft';
   $('formTitle').textContent='Review Import Booking.com';
   $('manualPanel').classList.remove('hidden');
@@ -385,6 +592,20 @@ function prefillBooking(p){
 }
 
 $('save').onclick=async()=>{
+  const saveBtn=$('save');
+  $('saveMsg').textContent='';
+
+  const urlPhotos=collectUrlPhotos();
+  if(urlPhotos.length>MAX_URL_PHOTOS){
+    $('saveMsg').textContent=`URL foto maksimal ${MAX_URL_PHOTOS}.`;
+    return;
+  }
+
+  if(storedUploadedPhotoUrls.length+pendingPhotoFiles.length>MAX_UPLOAD_PHOTOS){
+    $('saveMsg').textContent=`Foto upload maksimal ${MAX_UPLOAD_PHOTOS} per property.`;
+    return;
+  }
+
   const payload={
     name:$('name').value.trim(),
     property_type:$('ptype').value,
@@ -396,22 +617,60 @@ $('save').onclick=async()=>{
     experiences:$('experiences').value.split(',').map(x=>x.trim()).filter(Boolean),
     description:$('desc').value.trim(),
     booking_url:$('booking').value.trim(),
-    image_url:$('imageUrl').value.trim(),
     status:$('status').value
   };
-  if(!payload.name){ $('saveMsg').textContent='Nama property wajib diisi.'; return; }
 
-  const editId=$('editId').value;
-  let result;
-  if(editId) result=await db.from('properties').update(payload).eq('id',editId);
-  else result=await db.from('properties').insert(payload);
+  if(!payload.name){
+    $('saveMsg').textContent='Nama property wajib diisi.';
+    return;
+  }
 
-  $('saveMsg').textContent=result.error?result.error.message:(editId?'Perubahan berhasil disimpan.':'Property berhasil ditambahkan.');
-  if(!result.error){
+  saveBtn.disabled=true;
+  const oldSaveText=saveBtn.textContent;
+  saveBtn.textContent=pendingPhotoFiles.length?'Mengupload foto...':'Menyimpan...';
+
+  try{
+    const editId=$('editId').value;
+    const folderKey=editId
+      ? `property-${editId}`
+      : `new-${Date.now()}-${Math.random().toString(36).slice(2,9)}`;
+
+    const newUploaded=await uploadPendingPhotos(folderKey);
+    const uploadedPhotos=[...storedUploadedPhotoUrls,...newUploaded].slice(0,MAX_UPLOAD_PHOTOS);
+
+    payload.image_urls=urlPhotos;
+    payload.uploaded_image_urls=uploadedPhotos;
+    payload.image_url=urlPhotos[0] || uploadedPhotos[0] || '';
+
+    let result;
+
+    if(editId){
+      result=await db.from('properties').update(payload).eq('id',editId);
+    }else{
+      result=await db.from('properties').insert(payload);
+    }
+
+    if(result.error){
+      throw new Error(result.error.message);
+    }
+
+    $('saveMsg').textContent=editId?'Perubahan berhasil disimpan.':'Property berhasil ditambahkan.';
+
+    pendingPhotoFiles=[];
+    storedUploadedPhotoUrls=uploadedPhotos;
+
     await loadAll();
     $('propertySearch').value=payload.name;
     runSearch();
+
     setTimeout(()=>clearForm(),700);
+
+  }catch(err){
+    console.error(err);
+    $('saveMsg').textContent=err?.message||'Gagal menyimpan property.';
+  }finally{
+    saveBtn.disabled=false;
+    saveBtn.textContent=oldSaveText;
   }
 };
 
@@ -423,6 +682,37 @@ $('cancelEdit').onclick=clearForm;
 $('refresh').onclick=loadAll;
 $('logout').onclick=async e=>{e.preventDefault();await db.auth.signOut();location.href='login.html'};
 
+$('addPhotoUrl').onclick=()=>addPhotoUrlField('');
+$('imageUrl').oninput=updateUrlPhotoCount;
+
+$('photoFiles').onchange=e=>{
+  const incoming=Array.from(e.target.files||[]);
+
+  const invalid=incoming.filter(file=>!isAllowedPhotoFile(file));
+  if(invalid.length){
+    alert('Hanya file JPG, JPEG, atau PNG yang diperbolehkan.');
+  }
+
+  const allowed=incoming.filter(isAllowedPhotoFile);
+  const existingKeys=new Set(pendingPhotoFiles.map(fileKey));
+
+  for(const file of allowed){
+    if(existingKeys.has(fileKey(file))) continue;
+
+    if(storedUploadedPhotoUrls.length+pendingPhotoFiles.length>=MAX_UPLOAD_PHOTOS){
+      alert(`Maksimal ${MAX_UPLOAD_PHOTOS} foto upload per property.`);
+      break;
+    }
+
+    pendingPhotoFiles.push(file);
+    existingKeys.add(fileKey(file));
+  }
+
+  e.target.value='';
+  renderPendingFiles();
+};
+
+resetPhotoControls();
 loadAll();
 </script>
 </body>
