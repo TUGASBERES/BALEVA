@@ -86,7 +86,7 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}b
 </div>
 <div id="searchState" class="callout">
 <strong>Alur admin:</strong>
-<span class="muted">Cari → jika sudah ada, edit/lihat. Jika belum ada → cari data property atau tambah manual.</span>
+<span class="muted">Cari → jika sudah ada, edit/lihat. Jika belum ada → cari Booking.com atau tambah manual.</span>
 </div>
 <div id="searchResults" class="result-list"></div>
 </section>
@@ -159,8 +159,8 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}b
 </section>
 
 <section class="panel">
-<h2 style="margin-top:0">Pencarian Data Property</h2>
-<p class="muted">Pencarian data eksternal menggunakan Supabase Edge Function <code>property-search</code>. Hasil pencarian dapat direview terlebih dahulu sebelum disimpan ke database BALEVA. Jika tidak ada hasil, admin tetap dapat menggunakan opsi <b>+ Tambahkan Property Manual</b>.</p>
+<h2 style="margin-top:0">Booking.com Import</h2>
+<p class="muted">Tombol pencarian Booking.com pada alur di atas sudah disiapkan untuk memanggil Supabase Edge Function <code>booking-search</code>. Jika fungsi/API belum dikonfigurasi, admin tetap dapat menggunakan opsi <b>+ Tambahkan Property Manual</b>.</p>
 </section>
 </main>
 </div>
@@ -237,116 +237,9 @@ function bindRows(){
   });
 }
 
-function getPropertyName(p){
-  const direct=p?.name||p?.title||p?.tags?.name||'';
-  if(direct) return String(direct);
-  if(p?.display_name) return String(p.display_name).split(',')[0].trim();
-  return 'Property';
-}
-
-function getAddressText(p){
-  if(typeof p?.address==='string' && p.address.trim()) return p.address.trim();
-  if(p?.display_name) return String(p.display_name);
-
-  const a=(p?.address && typeof p.address==='object') ? p.address : {};
-  return [
-    a.road,
-    a.neighbourhood,
-    a.suburb,
-    a.village,
-    a.town,
-    a.city,
-    a.municipality,
-    a.county,
-    a.state,
-    a.postcode
-  ].filter(Boolean).join(', ');
-}
-
-function getAreaText(p){
-  const a=(p?.address && typeof p.address==='object') ? p.address : {};
-  return String(
-    p?.area ||
-    p?.city ||
-    p?.town ||
-    p?.village ||
-    p?.suburb ||
-    a.suburb ||
-    a.village ||
-    a.town ||
-    a.city ||
-    a.municipality ||
-    ''
-  );
-}
-
-function getLatitude(p){
-  const value=p?.latitude ?? p?.lat ?? p?.geometry?.lat ?? p?.coordinates?.lat;
-  return value===undefined || value===null ? '' : value;
-}
-
-function getLongitude(p){
-  const value=p?.longitude ?? p?.lng ?? p?.lon ?? p?.geometry?.lng ?? p?.geometry?.lon ?? p?.coordinates?.lng ?? p?.coordinates?.lon;
-  return value===undefined || value===null ? '' : value;
-}
-
-function inferRegion(p){
-  const explicit=String(p?.region||'').trim();
-  const valid=['Lombok Barat','Lombok Tengah','Lombok Timur','Lombok Utara','Kota Mataram'];
-  if(valid.includes(explicit)) return explicit;
-
-  const haystack=(getAddressText(p)+' '+getAreaText(p)+' '+explicit).toLowerCase();
-  if(haystack.includes('lombok barat')) return 'Lombok Barat';
-  if(haystack.includes('lombok tengah')) return 'Lombok Tengah';
-  if(haystack.includes('lombok timur')) return 'Lombok Timur';
-  if(haystack.includes('lombok utara')) return 'Lombok Utara';
-  if(haystack.includes('mataram')) return 'Kota Mataram';
-  return 'Lombok Tengah';
-}
-
-function inferPropertyType(p){
-  const valid=['Villa','Homestay','Hotel','Pondok','Guest House','Cottage','Lodge','Farm Stay','Property Rental','Resort','Bungalow','Lainnya'];
-  const explicit=String(p?.property_type||'').trim();
-  if(valid.includes(explicit)) return explicit;
-
-  const haystack=[
-    p?.property_type,
-    p?.type,
-    p?.category,
-    p?.tourism,
-    p?.tags?.tourism,
-    p?.tags?.accommodation,
-    getPropertyName(p)
-  ].filter(Boolean).join(' ').toLowerCase();
-
-  if(haystack.includes('villa')) return 'Villa';
-  if(haystack.includes('homestay') || haystack.includes('home stay')) return 'Homestay';
-  if(haystack.includes('guest house') || haystack.includes('guesthouse')) return 'Guest House';
-  if(haystack.includes('cottage')) return 'Cottage';
-  if(haystack.includes('lodge')) return 'Lodge';
-  if(haystack.includes('farm stay') || haystack.includes('farmstay')) return 'Farm Stay';
-  if(haystack.includes('resort')) return 'Resort';
-  if(haystack.includes('bungalow')) return 'Bungalow';
-  if(haystack.includes('pondok')) return 'Pondok';
-  if(haystack.includes('hotel') || haystack.includes('hostel') || haystack.includes('motel')) return 'Hotel';
-  return 'Lainnya';
-}
-
-function normaliseSearchItems(data){
-  if(Array.isArray(data)) return data;
-  if(Array.isArray(data?.items)) return data.items;
-  if(Array.isArray(data?.results)) return data.results;
-  if(Array.isArray(data?.data)) return data.data;
-  if(Array.isArray(data?.properties)) return data.properties;
-  return [];
-}
-
 function runSearch(){
-  const rawQ=$('propertySearch').value.trim();
-  const q=rawQ.toLowerCase();
-
+  const q=$('propertySearch').value.trim().toLowerCase();
   $('searchResults').innerHTML='';
-
   if(!q){
     $('searchState').className='callout';
     $('searchState').innerHTML='<strong>Masukkan nama property atau area.</strong> <span class="muted">Contoh: Kuta, Sembalun, Villa Senggigi.</span>';
@@ -361,169 +254,80 @@ function runSearch(){
   if(found.length){
     $('searchState').className='callout';
     $('searchState').innerHTML='<strong>'+found.length+' property ditemukan di BALEVA.</strong> <span class="muted">Tidak perlu menambahkan ulang.</span>';
-
     $('searchResults').innerHTML=found.map(p=>`
       <div class="result-item">
         <div class="result-main">
           <strong>${esc(p.name)}</strong>
-          <div class="muted small">
-            ${esc(p.property_type)} • ${esc(p.area||'')} • ${esc(p.region)} •
-            <span class="status ${p.status==='draft'?'draft':''}">${esc(p.status)}</span>
-          </div>
+          <div class="muted small">${esc(p.property_type)} • ${esc(p.area||'')} • ${esc(p.region)} • <span class="status ${p.status==='draft'?'draft':''}">${esc(p.status)}</span></div>
         </div>
         <div class="result-actions">
           <button class="btn outline resultEdit" data-id="${p.id}">Edit</button>
           <a class="btn outline" href="index.html" target="_blank">Lihat Website</a>
         </div>
       </div>`).join('');
-
-    document.querySelectorAll('.resultEdit')
-      .forEach(b=>b.onclick=()=>openEdit(Number(b.dataset.id)));
-
-    return;
+    document.querySelectorAll('.resultEdit').forEach(b=>b.onclick=()=>openEdit(Number(b.dataset.id)));
+  } else {
+    $('searchState').className='callout warn';
+    $('searchState').innerHTML=`
+      <strong>Property belum ditemukan di database BALEVA.</strong>
+      <div class="muted small" style="margin-top:4px">Anda dapat mencoba sumber Booking.com atau menambahkannya sendiri.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn outline" id="bookingSearchBtn">Cari Booking.com</button>
+        <button class="btn primary" id="manualFromSearch">+ Tambahkan Property Manual</button>
+      </div>`;
+    $('bookingSearchBtn').onclick=searchBooking;
+    $('manualFromSearch').onclick=()=>openManual(q);
   }
-
-  $('searchState').className='callout warn';
-  $('searchState').innerHTML=`
-    <strong>Property belum ditemukan di database BALEVA.</strong>
-    <div class="muted small" style="margin-top:4px">
-      Cari data property dari sumber pencarian yang sudah terhubung, atau tambahkan secara manual.
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn outline" id="propertySourceBtn">Cari Data Property</button>
-      <button class="btn primary" id="manualFromSearch">+ Tambahkan Property Manual</button>
-    </div>`;
-
-  $('propertySourceBtn').onclick=searchPropertySource;
-  $('manualFromSearch').onclick=()=>openManual(rawQ);
 }
 
-async function searchPropertySource(){
+async function searchBooking(){
   const q=$('propertySearch').value.trim();
   if(!q) return;
+  $('searchResults').innerHTML='<div class="callout">Mencari melalui Booking.com…</div>';
 
-  $('searchResults').innerHTML='<div class="callout">Mencari data property…</div>';
-
-  let data=null;
-  let error=null;
-
-  try{
-    const response=await db.functions.invoke('property-search',{
-      body:{query:q}
-    });
-    data=response.data;
-    error=response.error;
-  }catch(err){
-    error=err;
-  }
-
+  const {data,error}=await db.functions.invoke('property-search',{body:{query:q}});
   if(error){
-    console.error('property-search error:',error);
-
     $('searchResults').innerHTML=`
       <div class="callout warn">
-        <strong>Pencarian data property gagal.</strong>
-        <div class="muted small" style="margin-top:5px">
-          ${esc(error?.message||'Edge Function property-search tidak dapat dijalankan.')}
-        </div>
-        <button class="btn primary" id="fallbackManual" style="margin-top:10px">
-          + Tambahkan Property Manual
-        </button>
+        <strong>Booking.com API belum aktif atau Edge Function belum dikonfigurasi.</strong>
+        <div class="muted small" style="margin-top:5px">Anda tetap dapat menambahkan property secara manual.</div>
+        <button class="btn primary" id="fallbackManual" style="margin-top:10px">+ Tambahkan Property Manual</button>
       </div>`;
-
     $('fallbackManual').onclick=()=>openManual(q);
     return;
   }
 
-  const items=normaliseSearchItems(data);
-
+  const items=Array.isArray(data)?data:(Array.isArray(data?.items)?data.items:(Array.isArray(data?.results)?data.results:(Array.isArray(data?.data)?data.data:[])));
   if(!items.length){
-    console.log('property-search response:',data);
-
     $('searchResults').innerHTML=`
       <div class="callout warn">
-        <strong>Tidak ada hasil property yang cocok.</strong>
-        <div class="muted small" style="margin-top:5px">
-          Coba gunakan nama property atau lokasi yang lebih spesifik.
-        </div>
-        <button class="btn primary" id="noResultManual" style="margin-top:10px">
-          + Tambahkan Property Manual
-        </button>
+        <strong>Tidak ada hasil Booking.com yang cocok.</strong>
+        <button class="btn primary" id="noBookingManual" style="margin-top:10px">+ Tambahkan Property Manual</button>
       </div>`;
-
-    $('noResultManual').onclick=()=>openManual(q);
+    $('noBookingManual').onclick=()=>openManual(q);
     return;
   }
 
-  $('searchResults').innerHTML=items.map((p,i)=>{
-    const name=getPropertyName(p);
-    const address=getAddressText(p);
-    const area=getAreaText(p);
-    const lat=getLatitude(p);
-    const lng=getLongitude(p);
+  $('searchResults').innerHTML=items.map((p,i)=>`
+    <div class="result-item">
+      <div class="result-main">
+        <strong>${esc(p.name||p.title||(p.display_name?String(p.display_name).split(',')[0]:'Property Booking.com'))}</strong>
+        <div class="muted small">${esc((typeof p.address==='string'?p.address:'')||p.display_name||p.area||'')} ${p.url?'• Booking.com':''}</div>
+      </div>
+      <div class="result-actions">
+        <button class="btn primary bookingImport" data-i="${i}">+ Tambahkan ke BALEVA</button>
+      </div>
+    </div>`).join('');
 
-    return `
-      <div class="result-item">
-        <div class="result-main">
-          <strong>${esc(name)}</strong>
-          <div class="muted small">${esc(address||area||'Lokasi tidak tersedia')}</div>
-          ${(lat!=='' && lng!=='') ? `<div class="muted small">Koordinat: ${esc(lat)}, ${esc(lng)}</div>` : ''}
-        </div>
-        <div class="result-actions">
-          <button class="btn primary propertyImport" data-i="${i}">
-            + Tambahkan ke BALEVA
-          </button>
-        </div>
-      </div>`;
-  }).join('');
-
-  document.querySelectorAll('.propertyImport').forEach(b=>{
-    b.onclick=()=>prefillProperty(items[Number(b.dataset.i)]);
-  });
-}
-
-function prefillProperty(p){
-  clearForm();
-
-  $('name').value=getPropertyName(p);
-  $('ptype').value=inferPropertyType(p);
-  $('region').value=inferRegion(p);
-  $('area').value=getAreaText(p);
-  $('address').value=getAddressText(p);
-  $('lat').value=getLatitude(p);
-  $('lng').value=getLongitude(p);
-
-  const experiences=
-    Array.isArray(p?.experiences) ? p.experiences :
-    Array.isArray(p?.experience) ? p.experience :
-    [];
-
-  $('experiences').value=experiences.join(', ');
-  $('desc').value=p?.description||p?.desc||'';
-  $('booking').value=p?.booking_url||p?.url||p?.website||'';
-  $('imageUrl').value=p?.image_url||p?.image||p?.photo||'';
-  $('status').value='draft';
-
-  $('formTitle').textContent='Review Data Property';
-  $('manualPanel').classList.remove('hidden');
-  $('manualPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.bookingImport').forEach(b=>b.onclick=()=>prefillBooking(items[Number(b.dataset.i)]));
 }
 
 function clearForm(){
   $('editId').value='';
-  $('name').value='';
-  $('ptype').value='Villa';
-  $('region').value='Lombok Tengah';
-  $('area').value='';
-  $('address').value='';
-  $('lat').value='';
-  $('lng').value='';
-  $('experiences').value='';
-  $('desc').value='';
-  $('booking').value='';
-  $('imageUrl').value='';
-  $('status').value='draft';
-  $('saveMsg').textContent='';
+  $('name').value=''; $('ptype').value='Villa'; $('region').value='Lombok Tengah';
+  $('area').value=''; $('address').value=''; $('lat').value=''; $('lng').value='';
+  $('experiences').value=''; $('desc').value=''; $('booking').value=''; $('imageUrl').value='';
+  $('status').value='draft'; $('saveMsg').textContent='';
   $('formTitle').textContent='Tambahkan Property Manual';
 }
 
@@ -537,7 +341,6 @@ function openManual(suggest=''){
 function openEdit(id){
   const p=allProps.find(x=>x.id===id);
   if(!p) return;
-
   $('editId').value=p.id;
   $('name').value=p.name||'';
   $('ptype').value=p.property_type||'Villa';
@@ -552,11 +355,34 @@ function openEdit(id){
   $('imageUrl').value=p.image_url||'';
   $('status').value=p.status||'draft';
   $('formTitle').textContent='Edit Property';
-
   $('manualPanel').classList.remove('hidden');
   $('manualPanel').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function prefillBooking(p){
+  clearForm();
+
+  const addr=(p.address&&typeof p.address==='object')?p.address:{};
+  const displayName=p.display_name||'';
+  const propertyName=p.name||p.title||(displayName?String(displayName).split(',')[0].trim():'');
+  const addressText=(typeof p.address==='string'?p.address:'')||displayName||'';
+  const areaText=p.area||p.city||p.town||p.village||addr.suburb||addr.village||addr.town||addr.city||addr.municipality||'';
+
+  $('name').value=propertyName;
+  $('ptype').value=p.property_type||'Hotel';
+  $('region').value=p.region||'Lombok Tengah';
+  $('area').value=areaText;
+  $('address').value=addressText;
+  $('lat').value=p.latitude??p.lat??'';
+  $('lng').value=p.longitude??p.lng??p.lon??'';
+  $('desc').value=p.description||'';
+  $('booking').value=p.url||p.booking_url||'';
+  $('imageUrl').value=p.image_url||p.image||'';
+  $('status').value='draft';
+  $('formTitle').textContent='Review Import Booking.com';
+  $('manualPanel').classList.remove('hidden');
+  $('manualPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
 
 $('save').onclick=async()=>{
   const payload={
