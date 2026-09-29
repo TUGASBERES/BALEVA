@@ -171,7 +171,7 @@ for each row execute function public.baleva_log_reservation();
 
 grant select on public.baleva_staff,public.baleva_room_rates,public.baleva_reservations,public.baleva_reservation_events to authenticated;
 grant insert,update on public.baleva_room_rates,public.baleva_reservations to authenticated;
-grant usage,select on all sequences in schema public to authenticated;
+grant usage,select on sequence public.baleva_room_rates_id_seq,public.baleva_reservations_id_seq to authenticated;
 
 -- Activate the first owner after the account exists in Authentication:
 -- insert into public.baleva_staff(user_id, role, display_name)
