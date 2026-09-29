@@ -7,6 +7,7 @@
 <meta name="description" content="Cari villa, hotel, homestay dan penginapan di Lombok berdasarkan wilayah, jenis dan pengalaman. Lihat peta serta cek ketersediaan melalui BALEVA.">
 <link rel="canonical" href="https://www.baleva.my.id/">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="home-redesign.css">
 <style>
 :root{--teal:#006a78;--teal2:#008da1;--navy:#064f78;--gold:#f6a800;--bg:#f7f9f9;--ink:#17363c;--muted:#6b8084;--line:#dde7e8;--white:#fff;--shadow:0 12px 35px rgba(0,86,100,.12)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
@@ -31,34 +32,38 @@
 <header class="header">
   <div class="container nav">
     <img class="logo" src="baleva-logo.png" alt="Logo BALEVA">
-    <div class="brand">BALEVA</div>
+    <div class="brand">BALEVA<small>Stay • Explore • Experience Lombok</small></div>
     <nav class="links">
-      <a href="#property">Penginapan</a><a href="#wilayah">Wilayah</a><a href="#experience">Experience</a><a href="#mapSection">Peta Lombok</a>
+      <a href="#property">Penginapan</a><a href="#wilayah">Wilayah</a><a href="#experience">Experience</a><a href="#mapSection">Peta Lombok</a><a href="#bantuan">Bantuan</a>
     </nav>
-    <div class="actions"><button class="btn outline" id="mapTop">🗺 Peta</button><button class="btn primary" id="generalReq">Cek Ketersediaan</button></div>
+    <div class="actions"><button class="btn outline" id="mapTop">🗺 Peta</button><a class="btn primary" href="login.html">Masuk</a></div>
   </div>
 </header>
 
 <section class="hero">
   <div class="container hero-grid">
-    <div>
-      <span class="demo">BALEVA • PROPERTY-FIRST</span>
-      <h1>Stay • Explore • Experience Lombok.</h1>
-      <p>Temukan villa, homestay, hotel, pondok, cottage, guest house dan properti sewa di seluruh Lombok—lengkap dengan pengalaman lokal dan bantuan booking melalui WhatsApp.</p>
-      <div class="search">
-        <input id="q" placeholder="Cari villa, homestay, Sembalun, Kuta, Senggigi...">
-        <button class="btn primary" id="searchBtn">Cari Property</button>
-      </div>
-      <div class="chips" id="regionChips">
+    <div class="hero-copy">
+      <span class="demo">STAY • EXPLORE • EXPERIENCE LOMBOK</span>
+      <h1>Temukan Penginapan Terbaik<br>di Lombok</h1>
+      <p>Jelajahi homestay, villa, hotel, dan penginapan pilihan di berbagai wilayah Lombok. Temukan tempat yang cocok untuk perjalanan Anda.</p>
+    </div>
+  </div>
+  <div class="container hero-search-wrap">
+    <div class="search">
+      <label class="search-cell destination"><span>Destinasi</span><input id="q" placeholder="Lombok atau nama wilayah" aria-label="Cari destinasi atau nama penginapan"></label>
+      <label class="search-cell"><span>Check-in</span><input type="date" id="heroCheckin" aria-label="Tanggal check-in"></label>
+      <label class="search-cell"><span>Check-out</span><input type="date" id="heroCheckout" aria-label="Tanggal check-out"></label>
+      <label class="search-cell guests"><span>Tamu</span><select id="heroGuests" aria-label="Jumlah tamu"><option value="2">2 tamu</option><option value="1">1 tamu</option><option value="3">3 tamu</option><option value="4">4 tamu</option><option value="5">5 tamu</option><option value="6">6 tamu</option></select></label>
+      <button class="btn primary" id="searchBtn">⌕ Cari Penginapan</button>
+    </div>
+    <div class="chips" id="regionChips">
         <button class="chip active" data-region="all">Semua Lombok</button>
         <button class="chip" data-region="Lombok Barat">Lombok Barat</button>
         <button class="chip" data-region="Lombok Tengah">Lombok Tengah</button>
         <button class="chip" data-region="Lombok Timur">Lombok Timur</button>
         <button class="chip" data-region="Lombok Utara">Lombok Utara</button>
         <button class="chip" data-region="Kota Mataram">Kota Mataram</button>
-      </div>
     </div>
-    <img class="hero-logo" src="baleva-logo.png" alt="Logo BALEVA">
   </div>
 </section>
 
@@ -74,9 +79,10 @@
 <main>
 <section class="section">
   <div class="container">
-    <div class="section-head"><div><h2>Property pilihan di Lombok</h2><p class="sub">Listing menjadi fokus utama. Peta tersedia saat pengguna membutuhkannya.</p></div></div>
+    <div class="section-head"><div><h2>Penginapan Pilihan di Lombok</h2><p class="sub">Pilihan dari mitra BALEVA di berbagai wilayah Lombok.</p></div><a class="view-all" href="#property" id="viewAll">Lihat Semua →</a></div>
     <div class="grid" id="grid"></div>
     <div class="mapbox" id="mapSection"><div id="map"></div></div>
+    <div class="booking-note"><span class="note-icon">✓</span><div><strong>Rencanakan penginapan bersama BALEVA</strong><p>Ajukan tanggal dan jumlah tamu. Tim BALEVA akan memeriksa ketersediaan serta menginformasikan harga dan langkah pembayaran sebelum reservasi dikonfirmasi.</p></div><button class="btn primary" id="generalReq">Cek Ketersediaan</button></div>
   </div>
 </section>
 
@@ -106,14 +112,14 @@
 </div></section>
 </main>
 
-<footer class="footer"><div class="container footer-grid">
+<footer class="footer" id="bantuan"><div class="container footer-grid">
 <div><img class="logo" src="baleva-logo.png" alt="BALEVA"><p><strong>BALEVA</strong><br>Stay • Explore • Experience Lombok</p></div>
 <div><strong>Wilayah</strong><p>Lombok Barat<br>Lombok Tengah<br>Lombok Timur<br>Lombok Utara<br>Kota Mataram</p></div>
 <div>
   <strong>Booking Assistance</strong>
   <p>
-    AL: 087781998529<br>
-    Hendra: 087740137252<br><br>
+    Aldi Nurrasyid: <a href="https://wa.me/6287781998529">0877 8199 8529</a><br>
+    Hendra Masha Putra: <a href="https://wa.me/6287740137252">0877 4013 7252</a><br><br>
     <a href="mailto:adminbaleva@gmail.com">adminbaleva@gmail.com</a><br>
     <small><a href="login.html" style="opacity:.72;text-decoration:underline;text-underline-offset:3px;">Admin</a></small>
   </p>
@@ -256,6 +262,8 @@ async function loadProperties(){
 
   properties=(data||[]).map(normalizeProperty);
   selected=properties[0]||null;
+  const cover=properties.map(getPhotos).find(list=>list.some(url=>/^https:\/\//i.test(url)));
+  if(cover){const url=cover.find(url=>/^https:\/\//i.test(url));document.querySelector('.hero').style.setProperty('--hero-image',`url("${url.replace(/["\\]/g,'')}")`);document.querySelector('.hero').classList.add('hero-photo');}
   render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
@@ -274,7 +282,7 @@ function getPhotos(p){
 function filtered(){
   const q=$('q').value.trim().toLowerCase();
   return properties.filter(p=>{
-    const blob=[p.name,p.type,p.region,p.area,p.near,...(p.exp||[])].join(' ').toLowerCase();
+    const blob=[p.name,p.type,p.region,p.area,p.near,p.desc,...(p.exp||[]),...(p.extra_facilities||[])].join(' ').toLowerCase();
     return (region==='all'||p.region===region)&&($('type').value==='all'||p.type===$('type').value)&&($('experienceFilter').value==='all'||(p.exp||[]).includes($('experienceFilter').value))&&(!q||blob.includes(q));
   });
 }
@@ -284,11 +292,11 @@ function render(){
   $('grid').innerHTML=data.map(p=>{
     const photos=getPhotos(p);
     return `<article class="card">
-    <div class="media ${photos.length?'has-photo':''}">${photos.length?`<img src="${esc(photos[0])}" alt="${esc(p.name)}" loading="lazy">`:''}<span class="badge">${esc(p.type)}</span><button class="fav">♡</button></div>
+    <div class="media ${photos.length?'has-photo':''}">${photos.length?`<img src="${esc(photos[0])}" alt="${esc(p.name)}" loading="lazy">`:''}<span class="badge">${esc(p.type)}</span></div>
     <div class="body"><h3><a href="property.html?id=${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3><div class="meta">${esc(p.area)} • ${esc(p.region)}</div>
     <div class="tags">${p.exp.slice(0,2).map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div>
     <div class="near">📍 Dekat ${esc(p.near)}</div>
-    <div class="card-actions"><button class="btn outline detail" data-id="${esc(p.id)}">Lihat Detail</button><button class="btn primary req" data-id="${esc(p.id)}">Cek Tersedia</button></div></div>
+    <div class="card-actions"><a class="btn primary" href="property.html?id=${encodeURIComponent(p.id)}">Lihat Detail</a><button class="btn outline req" data-id="${esc(p.id)}">Cek Tersedia</button></div></div>
   </article>`;
   }).join('') || '<p>Tidak ada hasil.</p>';
   document.querySelectorAll('.req').forEach(b=>b.addEventListener('click',()=>openReq(Number(b.dataset.id))));
@@ -297,6 +305,9 @@ function render(){
 }
 document.querySelectorAll('#regionChips .chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#regionChips .chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');region=b.dataset.region;render();}));
 $('searchBtn').addEventListener('click',render);$('q').addEventListener('keydown',e=>{if(e.key==='Enter')render();});$('type').addEventListener('change',render);$('experienceFilter').addEventListener('change',render);
+function useSearchDates(){if($('heroCheckin').value)$('checkin').value=$('heroCheckin').value;if($('heroCheckout').value)$('checkout').value=$('heroCheckout').value;$('adults').value=$('heroGuests').value;}
+$('searchBtn').addEventListener('click',()=>{$('property').scrollIntoView({behavior:'smooth'});});
+$('viewAll').addEventListener('click',()=>{$('q').value='';region='all';$('type').value='all';$('experienceFilter').value='all';document.querySelectorAll('#regionChips .chip').forEach(x=>x.classList.toggle('active',x.dataset.region==='all'));render();});
 
 function showMap(){
   $('mapSection').classList.add('show');$('toggleMap').textContent='✕ Tutup Peta';initMap();setTimeout(()=>map.invalidateSize(),120);$('mapSection').scrollIntoView({behavior:'smooth',block:'center'});
@@ -388,6 +399,7 @@ function renderExtraFacilities(){
 function openReq(id){
   selected=properties.find(x=>x.id===id)||properties[0]||null;
   if(!selected){alert('Belum ada property published.');return;}
+  useSearchDates();
   $('modalName').textContent=selected.name+' • '+selected.area;
   renderExtraFacilities();
   $('modal').classList.add('show');
