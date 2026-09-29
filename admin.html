@@ -57,6 +57,7 @@ a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}b
 <a href="#" id="sideAdd">+ Tambah Manual</a>
 <a href="#allSection">Semua Property</a>
 <a href="#requests">Request</a>
+<a href="operations.html">Reservasi & Keuangan</a>
 <a href="index.html">Lihat Website</a>
 <a href="#" id="logout">Logout</a>
 </nav>
@@ -216,6 +217,11 @@ function esc(s){
 async function guard(){
   const {data}=await db.auth.getSession();
   if(!data.session){ location.href='login.html'; return false; }
+  const membership=await db.from('baleva_staff').select('role,active').eq('user_id',data.session.user.id).maybeSingle();
+  if(membership.error||!membership.data?.active||!['owner','admin'].includes(membership.data.role)){
+    document.querySelector('.main').innerHTML='<section class="panel"><h2>Akses ditolak</h2><p>Akun ini belum memiliki izin mengelola akomodasi. Hubungi admin utama BALEVA.</p><a href="login.html">Kembali ke login</a></section>';
+    return false;
+  }
   $('who').textContent='Login: '+data.session.user.email;
   return true;
 }
