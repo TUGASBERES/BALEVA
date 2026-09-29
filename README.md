@@ -15,7 +15,7 @@ Katalog akomodasi Lombok dengan halaman detail, peta, dan panel staf. Katalog ya
 - Tamu menghubungi BALEVA melalui katalog. Staf mencatat permintaan di `operations.html` dan **memeriksa ketersediaan kamar kepada mitra lebih dahulu**. Bila tersedia, staf memberi tahu pelanggan dan menanyakan keputusan memesan. Bila tidak tersedia, tawarkan alternatif sebelum ada pembayaran.
 - Setelah pelanggan ingin memesan, staf mengunci kamar dengan mitra. Lock hanya dapat dibuat untuk check-in dalam 30 hari ke depan. Masa lock bisa dipilih 2 atau 6 jam; masa habis diperiksa pada saat konfirmasi, meski status belum dibersihkan secara otomatis.
 - Staf memberikan rincian harga dan instruksi pembayaran melalui kanal resmi. Setelah dana tamu **benar-benar diterima selama lock berlaku**, staf memasukkan referensi pembayaran dan mengonfirmasi reservasi. Harga tamu = (NET RATE + markup) × kamar × malam. NET RATE hotel tetap utuh.
-- Pelanggan dapat **mengajukan pembatalan** setelah reservasi terkonfirmasi. Staf mencatat alasannya, lalu pengelola menerima atau menolak pengajuan dengan alasan. Persetujuan mengawali proses refund manual; dana dan kamar tidak dibatalkan otomatis.
+- Pelanggan dapat **mengajukan pembatalan** setelah reservasi terkonfirmasi lewat `cancellation.html` yang membuka WhatsApp BALEVA. Staf memeriksa nomor pesanan lalu mencatat alasannya di panel; pengelola menerima atau menolak pengajuan dengan alasan. Persetujuan mengawali proses refund manual; dana dan kamar tidak dibatalkan otomatis.
 - Setelah checkout, staf keuangan mencatat bukti pelunasan NET RATE hotel mulai hari ke-2 dan paling lambat hari ke-7. Panel menandai tagihan yang melewati hari ke-7; keterlambatan tidak disembunyikan.
 
 ## Yang dibutuhkan sebelum transaksi tamu otomatis

@@ -66,7 +66,8 @@ begin
   end if;
   if new.status = 'locked' and old.status <> 'locked' then
     if old.customer_contacted_at is null then raise exception 'Pelanggan belum dihubungi.'; end if;
-    if new.check_in < current_date or new.check_in > current_date + 30 then
+    if new.check_in < (now() at time zone 'Asia/Makassar')::date
+       or new.check_in > (now() at time zone 'Asia/Makassar')::date + 30 then
       raise exception 'Lock hanya untuk check-in dalam 30 hari ke depan.';
     end if;
     if new.lock_hours not in (2,6) then raise exception 'Pilih lock 2 atau 6 jam.'; end if;
@@ -172,9 +173,10 @@ begin
       and status = case when new.status = 'confirmed' then 'rejected' else 'approved' end) then
     raise exception 'Keputusan pembatalan belum dicatat.';
   end if;
-  if new.status = 'checked_out' and current_date < new.check_out then raise exception 'Tanggal checkout belum tiba.'; end if;
+  if new.status = 'checked_out' and (now() at time zone 'Asia/Makassar')::date < new.check_out then
+    raise exception 'Tanggal checkout belum tiba.'; end if;
   if new.status = 'settled' and (new.hotel_paid_at is null or new.hotel_payment_reference is null
-      or new.hotel_paid_at::date < new.check_out + 2) then
+      or (new.hotel_paid_at at time zone 'Asia/Makassar')::date < new.check_out + 2) then
     raise exception 'Pelunasan hotel memerlukan bukti dan mulai hari kedua setelah checkout.';
   end if;
   if new.status = 'refunded' and new.refund_at is null then raise exception 'Bukti refund wajib dicatat.'; end if;
