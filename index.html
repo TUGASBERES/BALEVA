@@ -263,8 +263,6 @@ async function loadProperties(){
 
   properties=(data||[]).map(normalizeProperty);
   selected=properties[0]||null;
-  const cover=properties.map(getPhotos).find(list=>list.some(url=>/^https:\/\//i.test(url)));
-  if(cover){const url=cover.find(url=>/^https:\/\//i.test(url));document.querySelector('.hero').style.setProperty('--hero-image',`url("${url.replace(/["\\]/g,'')}")`);document.querySelector('.hero').classList.add('hero-photo');}
   render();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
